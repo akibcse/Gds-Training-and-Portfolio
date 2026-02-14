@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getBlogs, getSeo } from "@/lib/getData";
 import { getSeoOverride } from "@/lib/seo-settings";
 
+export const revalidate = 10;
+
 export async function generateMetadata(): Promise<Metadata> {
   const [seo, override] = await Promise.all([getSeo(), getSeoOverride("blog")]);
   const title = "GDS Training Blog";

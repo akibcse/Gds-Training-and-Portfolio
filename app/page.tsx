@@ -11,7 +11,7 @@ import TestimonialCard from "@/components/TestimonialCard";
 import { getCourses, getPortfolio, getProfile, getSeo, getTestimonials } from "@/lib/getData";
 import { faqSchema, localBusinessSchema, personSchema } from "@/lib/structuredData";
 
-export const revalidate = 60;
+export const revalidate = 10;
 
 const homeFaqs = [
   {
