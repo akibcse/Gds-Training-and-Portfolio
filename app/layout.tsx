@@ -24,14 +24,16 @@ const serif = Merriweather({
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeo();
+  const siteUrl = seo?.siteUrl || 'https://gds-training.vercel.app';
+  
   return {
-    metadataBase: new URL(seo.siteUrl),
+    metadataBase: new URL(siteUrl),
     title: {
-      default: seo.defaultTitle,
-      template: seo.titleTemplate
+      default: seo?.defaultTitle || 'GDS Training',
+      template: seo?.titleTemplate || '%s'
     },
-    description: seo.defaultDescription,
-    keywords: seo.defaultKeywords,
+    description: seo?.defaultDescription || 'GDS Training in Dhaka',
+    keywords: seo?.defaultKeywords || [],
     alternates: {
       canonical: "/"
     },

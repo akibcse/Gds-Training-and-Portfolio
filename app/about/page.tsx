@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { getPortfolio, getProfile, getSeo } from "@/lib/getData";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeo();
   const title = "About Md. Akib Hasan - Certified GDS Instructor";

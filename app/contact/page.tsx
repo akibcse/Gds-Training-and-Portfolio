@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import LeadForm from "@/components/LeadForm";
 import { getProfile, getSeo } from "@/lib/getData";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeo();
   const title = "Contact Md. Akib Hasan for GDS Training";

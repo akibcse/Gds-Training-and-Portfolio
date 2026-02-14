@@ -1,5 +1,4 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { readJsonFile } from "./storage";
 
 export type Profile = {
   name: string;
@@ -128,11 +127,8 @@ export type SeoPageEntry = {
   structuredDataOn?: boolean;
 };
 
-const dataPath = path.join(process.cwd(), "data");
-
 const loadJson = async <T>(fileName: string): Promise<T> => {
-  const file = await fs.readFile(path.join(dataPath, fileName), "utf-8");
-  return JSON.parse(file) as T;
+  return await readJsonFile<T>(fileName);
 };
 
 export const getProfile = () => loadJson<Profile>("profile.json");

@@ -1,9 +1,11 @@
 import { ref, get, set, child, push, update, remove } from 'firebase/database';
-import { database } from './firebase';
+import { getFirebaseDatabase } from './firebase';
 
 const getDbRef = (fileName: string) => {
+  const db = getFirebaseDatabase();
+  if (!db) return null;
   const key = fileName.replace('.json', '');
-  return child(ref(database), key);
+  return child(ref(db), key);
 };
 
 const firebaseToArray = (data: unknown): unknown[] => {
@@ -24,7 +26,10 @@ const firebaseToArray = (data: unknown): unknown[] => {
 
 export const readJsonFile = async <T>(fileName: string): Promise<T> => {
   try {
-    const snapshot = await get(getDbRef(fileName));
+    const dbRef = getDbRef(fileName);
+    if (!dbRef) return [] as T;
+    
+    const snapshot = await get(dbRef);
     if (snapshot.exists()) {
       const data = snapshot.val();
       if (Array.isArray(data)) {
@@ -42,11 +47,10 @@ export const readJsonFile = async <T>(fileName: string): Promise<T> => {
 
 export const writeJsonFile = async (fileName: string, data: unknown) => {
   try {
-    if (Array.isArray(data)) {
-      await set(getDbRef(fileName), data);
-    } else {
-      await set(getDbRef(fileName), data);
-    }
+    const dbRef = getDbRef(fileName);
+    if (!dbRef) return;
+    
+    await set(dbRef, data);
     return;
   } catch (error) {
     console.error('Firebase write error:', error);
@@ -56,7 +60,10 @@ export const writeJsonFile = async (fileName: string, data: unknown) => {
 
 export const readJsonFileOrDefault = async <T>(fileName: string, fallback: T): Promise<T> => {
   try {
-    const snapshot = await get(getDbRef(fileName));
+    const dbRef = getDbRef(fileName);
+    if (!dbRef) return fallback;
+    
+    const snapshot = await get(dbRef);
     if (snapshot.exists()) {
       const data = snapshot.val();
       if (Array.isArray(data)) {
@@ -65,7 +72,7 @@ export const readJsonFileOrDefault = async <T>(fileName: string, fallback: T): P
       const arr = firebaseToArray(data);
       return (arr.length > 0 ? arr : fallback) as T;
     }
-    await set(getDbRef(fileName), fallback);
+    await set(dbRef, fallback);
     return fallback;
   } catch (error) {
     console.error('Firebase read error:', error);
@@ -74,14 +81,20 @@ export const readJsonFileOrDefault = async <T>(fileName: string, fallback: T): P
 };
 
 export const pushToArray = async (fileName: string, data: unknown): Promise<string> => {
-  const newRef = push(child(ref(database), fileName.replace('.json', '')));
+  const db = getFirebaseDatabase();
+  if (!db) return '';
+  
+  const newRef = push(child(ref(db), fileName.replace('.json', '')));
   await set(newRef, data);
   return newRef.key || '';
 };
 
 export const updateData = async (fileName: string, data: unknown) => {
   try {
-    await update(getDbRef(fileName), data as Record<string, unknown>);
+    const dbRef = getDbRef(fileName);
+    if (!dbRef) return;
+    
+    await update(dbRef, data as Record<string, unknown>);
     return;
   } catch (error) {
     console.error('Firebase update error:', error);
@@ -91,7 +104,10 @@ export const updateData = async (fileName: string, data: unknown) => {
 
 export const deleteData = async (fileName: string) => {
   try {
-    await remove(getDbRef(fileName));
+    const dbRef = getDbRef(fileName);
+    if (!dbRef) return;
+    
+    await remove(dbRef);
     return;
   } catch (error) {
     console.error('Firebase delete error:', error);
