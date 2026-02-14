@@ -6,22 +6,47 @@ const getDbRef = (fileName: string) => {
   return child(ref(database), key);
 };
 
+const firebaseToArray = (data: unknown): unknown[] => {
+  if (!data || typeof data !== 'object') return [];
+  const obj = data as Record<string, unknown>;
+  if (Array.isArray(data)) return data;
+  
+  const keys = Object.keys(obj);
+  if (keys.length === 0) return [];
+  
+  const isNumeric = keys.every(k => !isNaN(Number(k)));
+  if (isNumeric) {
+    return keys.sort((a, b) => Number(a) - Number(b)).map(k => obj[k]);
+  }
+  
+  return [obj];
+};
+
 export const readJsonFile = async <T>(fileName: string): Promise<T> => {
   try {
     const snapshot = await get(getDbRef(fileName));
     if (snapshot.exists()) {
-      return snapshot.val() as T;
+      const data = snapshot.val();
+      if (Array.isArray(data)) {
+        return data as T;
+      }
+      const arr = firebaseToArray(data);
+      return arr as T;
     }
-    return {} as T;
+    return [] as T;
   } catch (error) {
     console.error('Firebase read error:', error);
-    return {} as T;
+    return [] as T;
   }
 };
 
 export const writeJsonFile = async (fileName: string, data: unknown) => {
   try {
-    await set(getDbRef(fileName), data);
+    if (Array.isArray(data)) {
+      await set(getDbRef(fileName), data);
+    } else {
+      await set(getDbRef(fileName), data);
+    }
     return;
   } catch (error) {
     console.error('Firebase write error:', error);
@@ -33,7 +58,12 @@ export const readJsonFileOrDefault = async <T>(fileName: string, fallback: T): P
   try {
     const snapshot = await get(getDbRef(fileName));
     if (snapshot.exists()) {
-      return snapshot.val() as T;
+      const data = snapshot.val();
+      if (Array.isArray(data)) {
+        return data as T;
+      }
+      const arr = firebaseToArray(data);
+      return (arr.length > 0 ? arr : fallback) as T;
     }
     await set(getDbRef(fileName), fallback);
     return fallback;
