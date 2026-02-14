@@ -11,7 +11,7 @@ const ensureDataDir = async () => {
 };
 
 export const readJsonFile = async <T>(fileName: string): Promise<T> => {
-  if (isVercel) {
+  if (isVercel && database) {
     const dbRef = child(ref(database), fileName.replace('.json', ''));
     const snapshot = await get(dbRef);
     if (snapshot.exists()) {
@@ -26,7 +26,7 @@ export const readJsonFile = async <T>(fileName: string): Promise<T> => {
 };
 
 export const writeJsonFile = async (fileName: string, data: unknown) => {
-  if (isVercel) {
+  if (isVercel && database) {
     const dbRef = child(ref(database), fileName.replace('.json', ''));
     await set(dbRef, data);
     return;
@@ -39,7 +39,7 @@ export const writeJsonFile = async (fileName: string, data: unknown) => {
 };
 
 export const readJsonFileOrDefault = async <T>(fileName: string, fallback: T): Promise<T> => {
-  if (isVercel) {
+  if (isVercel && database) {
     const dbRef = child(ref(database), fileName.replace('.json', ''));
     const snapshot = await get(dbRef);
     if (snapshot.exists()) {
