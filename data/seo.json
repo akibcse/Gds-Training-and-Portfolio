@@ -16,5 +16,9 @@
     "Amadeus Course Bangladesh"
   ],
   "twitterHandle": "@roadyakib",
-  "locale": "en_US"
+  "locale": "en_US",
+  "defaultOgImage": "",
+  "twitterCard": "summary_large_image",
+  "googleVerification": "<meta name=\"google-site-verification\" content=\"8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0\" />",
+  "bingVerification": ""
 }
