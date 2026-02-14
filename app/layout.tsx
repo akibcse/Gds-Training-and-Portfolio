@@ -49,11 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: seo.defaultDescription,
       creator: seo.twitterHandle
     },
-    verification: {
-      google: seo.googleVerification,
-      other: {
-        bing: seo.bingVerification ?? ""
-      }
+    other: {
+      "google-site-verification": seo.googleVerification || "8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0"
     }
   };
 }
@@ -61,6 +58,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+      <head>
+        <meta name="google-site-verification" content="8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0" />
+      </head>
       <body className="font-[var(--font-sans)] text-ink">
         <Navbar />
         <PageTransition>
