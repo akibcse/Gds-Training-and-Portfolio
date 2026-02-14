@@ -1,4 +1,5 @@
-import { kv } from '@vercel/kv';
+import { ref, get, set, child } from 'firebase/database';
+import { database } from './firebase';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -11,8 +12,11 @@ const ensureDataDir = async () => {
 
 export const readJsonFile = async <T>(fileName: string): Promise<T> => {
   if (isVercel) {
-    const data = await kv.get<T>(fileName);
-    if (data) return data;
+    const dbRef = child(ref(database), fileName.replace('.json', ''));
+    const snapshot = await get(dbRef);
+    if (snapshot.exists()) {
+      return snapshot.val() as T;
+    }
     return {} as T;
   }
   await ensureDataDir();
@@ -23,7 +27,8 @@ export const readJsonFile = async <T>(fileName: string): Promise<T> => {
 
 export const writeJsonFile = async (fileName: string, data: unknown) => {
   if (isVercel) {
-    await kv.set(fileName, data);
+    const dbRef = child(ref(database), fileName.replace('.json', ''));
+    await set(dbRef, data);
     return;
   }
   await ensureDataDir();
@@ -35,9 +40,12 @@ export const writeJsonFile = async (fileName: string, data: unknown) => {
 
 export const readJsonFileOrDefault = async <T>(fileName: string, fallback: T): Promise<T> => {
   if (isVercel) {
-    const data = await kv.get<T>(fileName);
-    if (data) return data;
-    await kv.set(fileName, fallback);
+    const dbRef = child(ref(database), fileName.replace('.json', ''));
+    const snapshot = await get(dbRef);
+    if (snapshot.exists()) {
+      return snapshot.val() as T;
+    }
+    await set(dbRef, fallback);
     return fallback;
   }
   try {
