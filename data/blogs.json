@@ -1,0 +1,73 @@
+[
+  {
+    "id": "blog-001",
+    "slug": "how-to-learn-amadeus-gds-fast",
+    "title": "How to Learn Amadeus GDS Fast: 7-Step Practical Roadmap",
+    "excerpt": "A proven weekly roadmap to become confident in Amadeus reservation and ticketing tasks.",
+    "description": "If you are searching for how to learn Amadeus GDS effectively, this guide breaks down a practical study flow used by successful ticketing professionals in Dhaka.",
+    "publishedAt": "2026-01-15",
+    "author": "Md. Akib Hasan",
+    "keywords": ["How to learn Amadeus GDS", "Amadeus Training", "GDS Training in Dhaka"],
+    "content": [
+      "Start with airline geography, airport-city codes, and booking classes before touching advanced commands.",
+      "Practice creating PNRs daily with name entry, itinerary build, and contact remarks so command memory becomes natural.",
+      "Move to fare display, tax breakdown, and pricing logic to avoid common quote errors during live sales.",
+      "Train on ticket issue, exchange, and refund workflows because these are high-value tasks in real agencies.",
+      "Use timed simulation sessions to improve speed and quality under service pressure.",
+      "Review ADM risk cases weekly so you learn compliance along with technical commands.",
+      "Finish with mock interviews and customer communication scripts to turn technical confidence into employability."
+    ],
+    "relatedSlugs": [
+      "best-gds-training-institute-checklist",
+      "air-ticketing-training-with-job-placement-guide"
+    ]
+  },
+  {
+    "id": "blog-002",
+    "slug": "best-gds-training-institute-checklist",
+    "title": "Best GDS Training Institute: 10-Point Selection Checklist",
+    "excerpt": "Use this checklist to evaluate course quality, trainer depth, and real career outcomes.",
+    "description": "Choosing the best GDS training institute is easier when you compare curriculum depth, lab practice, and placement support instead of only course fees.",
+    "publishedAt": "2026-01-28",
+    "author": "Md. Akib Hasan",
+    "keywords": ["Best GDS training institute", "GDS Training", "Air Ticketing Course in Bangladesh"],
+    "content": [
+      "Check if the course includes Amadeus, Travelport, and Sabre rather than one platform only.",
+      "Look for trainers with agency or airline operations background.",
+      "Confirm whether curriculum covers ticket reissue and refund handling.",
+      "Ask for sample project cases and live booking simulations.",
+      "Evaluate the quality of interview and placement support.",
+      "Compare class size to ensure practical mentoring time.",
+      "Verify certification value and employer acceptance.",
+      "Review student outcomes from the last 12 months.",
+      "Check flexible schedule options if you are a working learner.",
+      "Select institutes that publish transparent course modules and fee breakdown."
+    ],
+    "relatedSlugs": [
+      "how-to-learn-amadeus-gds-fast",
+      "air-ticketing-training-with-job-placement-guide"
+    ]
+  },
+  {
+    "id": "blog-003",
+    "slug": "air-ticketing-training-with-job-placement-guide",
+    "title": "Air Ticketing Training with Job Placement: What Actually Works",
+    "excerpt": "A practical guide to convert air ticketing training into interview calls and offer letters.",
+    "description": "Many students ask for air ticketing training with job placement. This guide explains the proven path from learning to hiring outcomes in Bangladesh.",
+    "publishedAt": "2026-02-05",
+    "author": "Md. Akib Hasan",
+    "keywords": ["Air ticketing training with job placement", "Air Ticketing Course", "GDS Training"],
+    "content": [
+      "Build technical confidence first: booking, fare quote, ticketing, and reissue tasks.",
+      "Create a role-ready CV highlighting software proficiency and simulation projects.",
+      "Practice interview scripts for refund disputes, schedule changes, and customer urgency.",
+      "Apply strategically to agencies, OTAs, and corporate travel desks in Dhaka.",
+      "Follow up consistently with recruiters and keep command practice active.",
+      "Use mentorship feedback loops to close weak areas quickly."
+    ],
+    "relatedSlugs": [
+      "best-gds-training-institute-checklist",
+      "how-to-learn-amadeus-gds-fast"
+    ]
+  }
+]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "86448a18-08e8-4fd8-aedd-53199c51b9f9",
+    "slug": "sabre-professional-advance-training-for-airline-reservation",
+    "title": "Sabre Professional Advance Training for Airline Reservation",
+    "excerpt": "Master Sabre commands, fare rules, ticketing, reissue, and refund workflows.",
+    "description": "Our Sabre Training in Dhaka is designed for learners who want focused expertise in the world’s most popular GDS. The course includes booking lifecycle management, fare comparison, ticket issuance, and customer service standards for agency and airline environments.",
+    "duration": "10 weeks",
+    "certification": "Amadeus Course Completion Certificate",
+    "mode": "Offline Weekend + Online Evening",
+    "softwareCovered": [
+      "Sabre Auto Command",
+      "Sabre Manual or Graphical"
+    ],
+    "curriculum": [
+      "Sabreinterface and command logic",
+      "PNR create, split, and segment management",
+      "Pricing records, fare families, and taxes",
+      "Ticket issue, void, revalidation, and reissue",
+      "Refund and penalty handling",
+      "Queue and quality control best practices"
+    ],
+    "careerOutcomes": [
+      "Sabre Reservation Agent",
+      "Corporate Travel Desk Executive",
+      "Back-office Ticketing Specialist"
+    ],
+    "faqs": [],
+    "keywords": [
+      "SabreTraining",
+      "SabreCourse Bangladesh",
+      "How to learn SabreGDS",
+      "GDS Training"
+    ],
+    "relatedBlogSlugs": [
+      "how-to-learn-sabre-gds-fast",
+      "best-gds-training-institute-checklist"
+    ]
+  },
+  {
+    "id": "course-001",
+    "slug": "air-ticketing-course-gds-training-masterclass-travelport-and-sabre",
+    "title": "Air Ticketing Course + GDS Training Masterclass (Travelport, and Sabre)",
+    "excerpt": "Build job-ready airline reservation skills with Travelport, and Sabre",
+    "description": "This industry-focused Air Ticketing Course in Bangladesh combines PNR creation, fare quote, reissue, refund, and visa advisory basics with complete GDS Training. Students practice real reservation scenarios used by travel agencies and airline support desks.",
+    "duration": "1 months",
+    "certification": "Industry Certificate + Interview Preparation Dossier",
+    "mode": "Online+ Live Online",
+    "softwareCovered": [
+      "Travelport Galileo",
+      "Sabre Red 360"
+    ],
+    "curriculum": [
+      "Airline reservation fundamentals and IATA geography",
+      "PNR creation, fare filing, and ticketing",
+      "Domestic and international fare construction",
+      "Reissue, refund, ADM prevention, and service quality"
+    ],
+    "careerOutcomes": [
+      "Air Ticketing Executive",
+      "GDS Reservation Agent",
+      "OTA Booking Support Specialist",
+      "Travel Consultant"
+    ],
+    "faqs": [],
+    "keywords": [
+      "Air Ticketing Course",
+      "GDS Training",
+      "Airline Reservation Course",
+      "Air Ticketing Course in Bangladesh",
+      "GDS Training in Dhaka"
+    ],
+    "relatedBlogSlugs": [
+      "how-to-learn-sabre-gds-fast",
+      "air-ticketing-training-with-job-placement-guide",
+      "how-to-learn-galileo-gds-fast"
+    ]
+  }
+]
