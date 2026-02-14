@@ -3,7 +3,7 @@ import CourseCard from "@/components/CourseCard";
 import { getCourses, getSeo } from "@/lib/getData";
 import { getSeoOverride } from "@/lib/seo-settings";
 
-export const revalidate = 10;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [seo, override] = await Promise.all([getSeo(), getSeoOverride("courses")]);

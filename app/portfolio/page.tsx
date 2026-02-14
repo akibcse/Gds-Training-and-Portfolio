@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getPortfolioProjects, getSeo } from "@/lib/getData";
 import { getSeoOverride } from "@/lib/seo-settings";
 
-export const revalidate = 10;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [seo, override] = await Promise.all([getSeo(), getSeoOverride("portfolio")]);
