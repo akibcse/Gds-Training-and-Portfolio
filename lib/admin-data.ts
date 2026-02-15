@@ -1,4 +1,4 @@
-import { readJsonFileOrDefault, writeJsonFile } from "@/lib/storage";
+import { readJsonFileOrDefault, readJsonObjectOrDefault, writeJsonFile } from "@/lib/storage";
 
 export type ProfileRecord = {
   name: string;
@@ -143,20 +143,13 @@ export const FILES = {
   seoPages: "seo-pages.json"
 } as const;
 
-export const getCourses = () => readJsonFileOrDefault<CourseRecord[]>(FILES.courses, []);
-export const setCourses = (rows: CourseRecord[]) => writeJsonFile(FILES.courses, rows);
-
-export const getBlogs = () => readJsonFileOrDefault<BlogRecord[]>(FILES.blogs, []);
-export const setBlogs = (rows: BlogRecord[]) => writeJsonFile(FILES.blogs, rows);
-
-export const getProjects = () => readJsonFileOrDefault<PortfolioProject[]>(FILES.projects, []);
-export const setProjects = (rows: PortfolioProject[]) => writeJsonFile(FILES.projects, rows);
-
-export const getLeadUsers = () => readJsonFileOrDefault<LeadUser[]>(FILES.users, []);
-export const setLeadUsers = (rows: LeadUser[]) => writeJsonFile(FILES.users, rows);
-
-export const getProfileRecord = () =>
-  readJsonFileOrDefault<ProfileRecord>(FILES.profile, {
+export const getCourses = async () => await readJsonFileOrDefault<CourseRecord[]>(FILES.courses, []);
+export const getBlogs = async () => await readJsonFileOrDefault<BlogRecord[]>(FILES.blogs, []);
+export const getProjects = async () => await readJsonFileOrDefault<PortfolioProject[]>(FILES.projects, []);
+export const setProjects = async (rows: PortfolioProject[]) => await writeJsonFile(FILES.projects, rows);
+export const getLeadUsers = async () => await readJsonFileOrDefault<LeadUser[]>(FILES.users, []);
+export const getProfileRecord = async () =>
+  await readJsonObjectOrDefault<ProfileRecord>(FILES.profile, {
     name: "",
     tagline: "",
     headline: "",
@@ -179,7 +172,7 @@ export const getProfileRecord = () =>
 export const setProfileRecord = (row: ProfileRecord) => writeJsonFile(FILES.profile, row);
 
 export const getPortfolioProfileRecord = () =>
-  readJsonFileOrDefault<PortfolioProfileRecord>(FILES.portfolioProfile, {
+  readJsonObjectOrDefault<PortfolioProfileRecord>(FILES.portfolioProfile, {
     fullName: "",
     profileImage: "",
     location: "",
@@ -196,9 +189,9 @@ export const getPortfolioProfileRecord = () =>
     languages: []
   });
 
-export const setPortfolioProfileRecord = (row: PortfolioProfileRecord) => writeJsonFile(FILES.portfolioProfile, row);
+export const setPortfolioProfileRecord = async (row: PortfolioProfileRecord) => await writeJsonFile(FILES.portfolioProfile, row);
 
-export const getSeoGlobal = () => readJsonFileOrDefault<SeoGlobal>(FILES.seoGlobal, {
+export const getSeoGlobal = async () => await readJsonObjectOrDefault<SeoGlobal>(FILES.seoGlobal, {
   siteUrl: "https://example.com",
   siteName: "Training Institute",
   defaultTitle: "Training Institute",
@@ -210,10 +203,10 @@ export const getSeoGlobal = () => readJsonFileOrDefault<SeoGlobal>(FILES.seoGlob
   twitterCard: "summary_large_image"
 });
 
-export const setSeoGlobal = (row: SeoGlobal) => writeJsonFile(FILES.seoGlobal, row);
+export const setSeoGlobal = async (row: SeoGlobal) => await writeJsonFile(FILES.seoGlobal, row);
 
-export const getSeoPages = () => readJsonFileOrDefault<SeoPageEntry[]>(FILES.seoPages, []);
-export const setSeoPages = (rows: SeoPageEntry[]) => writeJsonFile(FILES.seoPages, rows);
+export const getSeoPages = async () => await readJsonFileOrDefault<SeoPageEntry[]>(FILES.seoPages, []);
+export const setSeoPages = async (rows: SeoPageEntry[]) => await writeJsonFile(FILES.seoPages, rows);
 
 export const listFromCsvInput = (value: string) =>
   value

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getProjects, setProjects, type PortfolioProject } from "@/lib/admin-data";
 import { isAdminAuthenticated } from "@/lib/admin";
 
+export const dynamic = 'force-dynamic';
+
+
 const normalize = (input: Partial<PortfolioProject>): PortfolioProject => {
   const slug = (input.slug ?? "").trim().toLowerCase();
   return {

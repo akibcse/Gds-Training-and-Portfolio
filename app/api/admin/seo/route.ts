@@ -2,32 +2,35 @@ import { NextResponse } from "next/server";
 import { getSeoGlobal, getSeoPages, setSeoGlobal, setSeoPages, type SeoGlobal, type SeoPageEntry } from "@/lib/admin-data";
 import { isAdminAuthenticated } from "@/lib/admin";
 
+export const dynamic = 'force-dynamic';
+
+
 const normalizeGlobal = (input: Partial<SeoGlobal>): SeoGlobal => ({
-  siteUrl: (input.siteUrl ?? "").trim(),
-  siteName: (input.siteName ?? "").trim(),
-  defaultTitle: (input.defaultTitle ?? "").trim(),
-  titleTemplate: (input.titleTemplate ?? "").trim() || "%s",
-  defaultDescription: (input.defaultDescription ?? "").trim(),
-  defaultKeywords: Array.isArray(input.defaultKeywords) ? input.defaultKeywords.filter(Boolean) : [],
-  twitterHandle: (input.twitterHandle ?? "").trim(),
-  locale: (input.locale ?? "en_US").trim(),
-  defaultOgImage: (input.defaultOgImage ?? "").trim(),
-  twitterCard: input.twitterCard === "summary" ? "summary" : "summary_large_image",
-  googleVerification: (input.googleVerification ?? "").trim(),
-  bingVerification: (input.bingVerification ?? "").trim()
+  siteUrl: (input?.siteUrl ?? "").trim() || "",
+  siteName: (input?.siteName ?? "").trim() || "",
+  defaultTitle: (input?.defaultTitle ?? "").trim() || "",
+  titleTemplate: (input?.titleTemplate ?? "").trim() || "%s",
+  defaultDescription: (input?.defaultDescription ?? "").trim() || "",
+  defaultKeywords: Array.isArray(input?.defaultKeywords) ? input.defaultKeywords.filter(Boolean) : [],
+  twitterHandle: (input?.twitterHandle ?? "").trim() || "",
+  locale: (input?.locale ?? "en_US").trim() || "en_US",
+  defaultOgImage: (input?.defaultOgImage ?? "").trim() || "",
+  twitterCard: input?.twitterCard === "summary" ? "summary" : "summary_large_image",
+  googleVerification: (input?.googleVerification ?? "").trim() || "",
+  bingVerification: (input?.bingVerification ?? "").trim() || ""
 });
 
 const normalizePages = (items: SeoPageEntry[]) =>
-  items
+  (Array.isArray(items) ? items : [])
     .map((item) => ({
-      pageKey: item.pageKey.trim(),
-      metaTitle: item.metaTitle.trim(),
-      metaDescription: item.metaDescription.trim(),
-      keywords: Array.isArray(item.keywords) ? item.keywords.filter(Boolean) : [],
-      canonicalUrl: item.canonicalUrl?.trim() ?? "",
-      ogTitle: item.ogTitle?.trim() ?? "",
-      ogDescription: item.ogDescription?.trim() ?? "",
-      structuredDataOn: item.structuredDataOn ?? true
+      pageKey: item?.pageKey?.trim() || "",
+      metaTitle: item?.metaTitle?.trim() || "",
+      metaDescription: item?.metaDescription?.trim() || "",
+      keywords: Array.isArray(item?.keywords) ? item.keywords.filter(Boolean) : [],
+      canonicalUrl: item?.canonicalUrl?.trim() || "",
+      ogTitle: item?.ogTitle?.trim() || "",
+      ogDescription: item?.ogDescription?.trim() || "",
+      structuredDataOn: item?.structuredDataOn ?? true
     }))
     .filter((item) => item.pageKey);
 

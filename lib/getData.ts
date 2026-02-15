@@ -1,4 +1,4 @@
-import { readJsonFile } from "./storage";
+import { readJsonFile, readJsonObject } from "./storage";
 
 export type Profile = {
   name: string;
@@ -131,12 +131,16 @@ const loadJson = async <T>(fileName: string): Promise<T> => {
   return await readJsonFile<T>(fileName);
 };
 
-export const getProfile = () => loadJson<Profile>("profile.json");
+const loadJsonObject = async <T>(fileName: string): Promise<T | null> => {
+  return await readJsonObject<T>(fileName);
+};
+
+export const getProfile = async () => (await loadJsonObject<Profile>("profile.json"))!;
 export const getCourses = () => loadJson<Course[]>("courses.json");
 export const getBlogs = () => loadJson<Blog[]>("blogs.json");
 export const getTestimonials = () => loadJson<Testimonial[]>("testimonials.json");
-export const getSeo = () => loadJson<Seo>("seo.json");
-export const getPortfolio = () => loadJson<Portfolio>("portfolio.json");
+export const getSeo = async () => (await loadJsonObject<Seo>("seo.json"))!;
+export const getPortfolio = async () => (await loadJsonObject<Portfolio>("portfolio.json"))!;
 export const getPortfolioProjects = () => loadJson<PortfolioProject[]>("projects.json");
 export const getSeoPages = () => loadJson<SeoPageEntry[]>("seo-pages.json");
 

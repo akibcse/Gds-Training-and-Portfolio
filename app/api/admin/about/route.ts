@@ -9,6 +9,9 @@ import {
 } from "@/lib/admin-data";
 import { isAdminAuthenticated } from "@/lib/admin";
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET() {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,62 +22,62 @@ export async function GET() {
 }
 
 const normalizeProfile = (input: ProfileRecord): ProfileRecord => ({
-  name: input.name.trim(),
-  tagline: input.tagline.trim(),
-  headline: input.headline.trim(),
-  description: input.description.trim(),
-  phone: input.phone.trim(),
-  email: input.email.trim(),
-  whatsapp: input.whatsapp.trim(),
+  name: input?.name?.trim() || "",
+  tagline: input?.tagline?.trim() || "",
+  headline: input?.headline?.trim() || "",
+  description: input?.description?.trim() || "",
+  phone: input?.phone?.trim() || "",
+  email: input?.email?.trim() || "",
+  whatsapp: input?.whatsapp?.trim() || "",
   address: {
-    street: input.address.street.trim(),
-    city: input.address.city.trim(),
-    region: input.address.region.trim(),
-    postalCode: input.address.postalCode.trim(),
-    country: input.address.country.trim()
+    street: input?.address?.street?.trim() || "",
+    city: input?.address?.city?.trim() || "",
+    region: input?.address?.region?.trim() || "",
+    postalCode: input?.address?.postalCode?.trim() || "",
+    country: input?.address?.country?.trim() || ""
   },
-  experienceYears: Number(input.experienceYears) || 0,
-  studentsTrained: Number(input.studentsTrained) || 0,
-  jobPlacementSupport: Boolean(input.jobPlacementSupport)
+  experienceYears: Number(input?.experienceYears) || 0,
+  studentsTrained: Number(input?.studentsTrained) || 0,
+  jobPlacementSupport: Boolean(input?.jobPlacementSupport)
 });
 
 const normalizePortfolioProfile = (input: PortfolioProfileRecord): PortfolioProfileRecord => ({
-  fullName: input.fullName.trim(),
-  profileImage: input.profileImage.trim(),
-  location: input.location.trim(),
-  phones: Array.isArray(input.phones) ? input.phones.map((item) => item.trim()).filter(Boolean) : [],
-  email: input.email.trim(),
-  careerObjective: input.careerObjective.trim(),
-  careerSummary: Array.isArray(input.careerSummary) ? input.careerSummary.map((item) => item.trim()).filter(Boolean) : [],
-  specialQualification: input.specialQualification.trim(),
-  experience: Array.isArray(input.experience)
+  fullName: input?.fullName?.trim() || "",
+  profileImage: input?.profileImage?.trim() || "",
+  location: input?.location?.trim() || "",
+  phones: Array.isArray(input?.phones) ? input.phones.map((item) => item?.trim() || "").filter(Boolean) : [],
+  email: input?.email?.trim() || "",
+  careerObjective: input?.careerObjective?.trim() || "",
+  careerSummary: Array.isArray(input?.careerSummary) ? input.careerSummary.map((item) => item?.trim() || "").filter(Boolean) : [],
+  specialQualification: input?.specialQualification?.trim() || "",
+  experience: Array.isArray(input?.experience)
     ? input.experience.map((item) => ({
-        title: item.title?.trim() ?? "",
-        organization: item.organization?.trim() ?? "",
-        location: item.location?.trim() ?? "",
-        duration: item.duration?.trim() ?? "",
-        years: item.years?.trim() ?? "",
-        highlights: Array.isArray(item.highlights) ? item.highlights.map((hl) => hl.trim()).filter(Boolean) : []
-      }))
+      title: item?.title?.trim() || "",
+      organization: item?.organization?.trim() || "",
+      location: item?.location?.trim() || "",
+      duration: item?.duration?.trim() || "",
+      years: item?.years?.trim() || "",
+      highlights: Array.isArray(item?.highlights) ? item.highlights.map((hl) => hl?.trim() || "").filter(Boolean) : []
+    }))
     : [],
-  education: Array.isArray(input.education)
+  education: Array.isArray(input?.education)
     ? input.education.map((item) => ({
-        exam: item.exam?.trim() ?? "",
-        institute: item.institute?.trim() ?? "",
-        result: item.result?.trim() ?? "",
-        year: item.year?.trim() ?? ""
-      }))
+      exam: item?.exam?.trim() || "",
+      institute: item?.institute?.trim() || "",
+      result: item?.result?.trim() || "",
+      year: item?.year?.trim() || ""
+    }))
     : [],
-  trainings: Array.isArray(input.trainings) ? input.trainings.map((item) => item.trim()).filter(Boolean) : [],
-  professionalQualification: input.professionalQualification.trim(),
-  skills: Array.isArray(input.skills) ? input.skills.map((item) => item.trim()).filter(Boolean) : [],
-  languages: Array.isArray(input.languages)
+  trainings: Array.isArray(input?.trainings) ? input.trainings.map((item) => item?.trim() || "").filter(Boolean) : [],
+  professionalQualification: input?.professionalQualification?.trim() || "",
+  skills: Array.isArray(input?.skills) ? input.skills.map((item) => item?.trim() || "").filter(Boolean) : [],
+  languages: Array.isArray(input?.languages)
     ? input.languages.map((item) => ({
-        name: item.name?.trim() ?? "",
-        reading: item.reading?.trim() ?? "",
-        writing: item.writing?.trim() ?? "",
-        speaking: item.speaking?.trim() ?? ""
-      }))
+      name: item?.name?.trim() || "",
+      reading: item?.reading?.trim() || "",
+      writing: item?.writing?.trim() || "",
+      speaking: item?.speaking?.trim() || ""
+    }))
     : []
 });
 

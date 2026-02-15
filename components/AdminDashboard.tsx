@@ -74,9 +74,8 @@ function ToastContainer({ toasts, remove }: { toasts: Toast[]; remove: (id: stri
             initial={{ opacity: 0, x: 50, scale: 0.9 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 50, scale: 0.9 }}
-            className={`min-w-[280px] rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${
-              toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
-            }`}
+            className={`min-w-[280px] rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
+              }`}
           >
             <div className="flex items-center justify-between gap-3">
               <span>{toast.message}</span>
@@ -136,9 +135,8 @@ function ListEditor({ label, items, onChange, placeholder, required }: ListEdito
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className={`flex items-center gap-2 rounded-lg border bg-white p-2 ${
-                        snapshot.isDragging ? "border-aviation-500 shadow-lg" : "border-aviation-200"
-                      }`}
+                      className={`flex items-center gap-2 rounded-lg border bg-white p-2 ${snapshot.isDragging ? "border-aviation-500 shadow-lg" : "border-aviation-200"
+                        }`}
                     >
                       <div {...provided.dragHandleProps} className="cursor-grab text-ink/40 hover:text-ink/70">
                         ⋮⋮
@@ -176,7 +174,8 @@ type ImagePreviewProps = {
 
 function ImagePreview({ value, label }: ImagePreviewProps) {
   const [error, setError] = useState(false);
-  const isUrl = value.startsWith("http://") || value.startsWith("https://");
+  const strValue = value || "";
+  const isUrl = strValue.startsWith("http://") || strValue.startsWith("https://");
 
   if (!value) {
     return (
@@ -251,17 +250,17 @@ export default function AdminDashboard(props: Props) {
   const [tab, setTab] = useState<Tab>("courses");
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const [courses, setCourses] = useState(props.courses);
-  const [blogs, setBlogs] = useState(props.blogs);
-  const [projects, setProjects] = useState(props.projects);
-  const [users, setUsers] = useState(props.users);
-  const [seoGlobal, setSeoGlobal] = useState(props.seoGlobal);
-  const [seoPagesText, setSeoPagesText] = useState(JSON.stringify(props.seoPages, null, 2));
-  const [profile, setProfile] = useState(props.profile);
-  const [portfolioProfile, setPortfolioProfile] = useState(props.portfolioProfile);
-  const [experienceRows, setExperienceRows] = useState(props.portfolioProfile.experience);
-  const [educationRows, setEducationRows] = useState(props.portfolioProfile.education);
-  const [languageRows, setLanguageRows] = useState(props.portfolioProfile.languages);
+  const [courses, setCourses] = useState(props.courses || []);
+  const [blogs, setBlogs] = useState(props.blogs || []);
+  const [projects, setProjects] = useState(props.projects || []);
+  const [users, setUsers] = useState(props.users || []);
+  const [seoGlobal, setSeoGlobal] = useState(props.seoGlobal || {});
+  const [seoPagesText, setSeoPagesText] = useState(JSON.stringify(props.seoPages || [], null, 2));
+  const [profile, setProfile] = useState(props.profile || {});
+  const [portfolioProfile, setPortfolioProfile] = useState(props.portfolioProfile || {});
+  const [experienceRows, setExperienceRows] = useState(props.portfolioProfile?.experience || []);
+  const [educationRows, setEducationRows] = useState(props.portfolioProfile?.education || []);
+  const [languageRows, setLanguageRows] = useState(props.portfolioProfile?.languages || []);
 
   const [editingCourseId, setEditingCourseId] = useState("");
   const [editingBlogId, setEditingBlogId] = useState("");
@@ -318,7 +317,7 @@ export default function AdminDashboard(props: Props) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const leadsCount = props.registrations.length + props.bookings.length;
+  const leadsCount = (props.registrations?.length || 0) + (props.bookings?.length || 0);
 
   const logout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -326,20 +325,19 @@ export default function AdminDashboard(props: Props) {
   };
 
   const setCourseFromRecord = (course: CourseRecord) => {
-    setEditingCourseId(course.id);
     setCourseForm({
-      title: course.title,
-      slug: course.slug,
-      excerpt: course.excerpt,
-      description: course.description,
-      duration: course.duration,
-      certification: course.certification,
-      mode: course.mode,
-      softwareCovered: course.softwareCovered,
-      curriculum: course.curriculum,
-      careerOutcomes: course.careerOutcomes,
-      keywords: course.keywords,
-      relatedBlogSlugs: course.relatedBlogSlugs
+      title: course.title || "",
+      slug: course.slug || "",
+      excerpt: course.excerpt || "",
+      description: course.description || "",
+      duration: course.duration || "",
+      certification: course.certification || "",
+      mode: course.mode || "",
+      softwareCovered: course.softwareCovered || [],
+      curriculum: course.curriculum || [],
+      careerOutcomes: course.careerOutcomes || [],
+      keywords: course.keywords || [],
+      relatedBlogSlugs: course.relatedBlogSlugs || []
     });
   };
 
@@ -428,15 +426,15 @@ export default function AdminDashboard(props: Props) {
   const setBlogFromRecord = (blog: BlogRecord) => {
     setEditingBlogId(blog.id);
     setBlogForm({
-      title: blog.title,
-      slug: blog.slug,
-      excerpt: blog.excerpt,
-      description: blog.description,
-      publishedAt: blog.publishedAt,
-      author: blog.author,
-      keywords: blog.keywords,
-      content: blog.content,
-      relatedSlugs: blog.relatedSlugs
+      title: blog.title || "",
+      slug: blog.slug || "",
+      excerpt: blog.excerpt || "",
+      description: blog.description || "",
+      publishedAt: blog.publishedAt || "",
+      author: blog.author || "",
+      keywords: blog.keywords || [],
+      content: blog.content || [],
+      relatedSlugs: blog.relatedSlugs || []
     });
   };
 
@@ -519,13 +517,13 @@ export default function AdminDashboard(props: Props) {
   const setProjectFromRecord = (project: PortfolioProject) => {
     setEditingProjectId(project.id);
     setProjectForm({
-      title: project.title,
-      slug: project.slug,
-      category: project.category,
-      description: project.description,
-      caseStudy: project.caseStudy,
-      technologies: project.technologies,
-      imageUrl: project.imageUrl
+      title: project.title || "",
+      slug: project.slug || "",
+      category: project.category || "",
+      description: project.description || "",
+      caseStudy: project.caseStudy || "",
+      technologies: project.technologies || [],
+      imageUrl: project.imageUrl || ""
     });
   };
 
@@ -1387,25 +1385,25 @@ export default function AdminDashboard(props: Props) {
               <div className="md:col-span-2 grid gap-3 md:grid-cols-2">
                 <ListEditor
                   label="Phones"
-                  items={portfolioProfile.phones}
+                  items={portfolioProfile.phones || []}
                   onChange={(items) => setPortfolioProfile((p) => ({ ...p, phones: items }))}
                   placeholder="Phone number"
                 />
                 <ListEditor
                   label="Career Summary"
-                  items={portfolioProfile.careerSummary}
+                  items={portfolioProfile.careerSummary || []}
                   onChange={(items) => setPortfolioProfile((p) => ({ ...p, careerSummary: items }))}
                   placeholder="Summary point"
                 />
                 <ListEditor
                   label="Trainings"
-                  items={portfolioProfile.trainings}
+                  items={portfolioProfile.trainings || []}
                   onChange={(items) => setPortfolioProfile((p) => ({ ...p, trainings: items }))}
                   placeholder="Training name"
                 />
                 <ListEditor
                   label="Skills"
-                  items={portfolioProfile.skills}
+                  items={portfolioProfile.skills || []}
                   onChange={(items) => setPortfolioProfile((p) => ({ ...p, skills: items }))}
                   placeholder="Skill name"
                 />
@@ -1446,7 +1444,7 @@ export default function AdminDashboard(props: Props) {
                                   <button type="button" onClick={() => removeExperienceRow(index)} className="rounded-full border border-red-300 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50">Remove</button>
                                 </div>
                               </div>
-                              <textarea className="mt-2 w-full rounded-lg border border-aviation-200 px-3 py-2 text-sm" rows={2} placeholder="Highlights (one per line)" value={item.highlights.join("\n")} onChange={(e) => updateExperienceHighlights(index, e.target.value)} />
+                              <textarea className="mt-2 w-full rounded-lg border border-aviation-200 px-3 py-2 text-sm" rows={2} placeholder="Highlights (one per line)" value={(item.highlights || []).join("\n")} onChange={(e) => updateExperienceHighlights(index, e.target.value)} />
                             </div>
                           )}
                         </Draggable>

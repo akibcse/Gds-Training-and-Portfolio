@@ -16,9 +16,9 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: ["GDS Training in Dhaka", "Amadeus Course Bangladesh", "Air Ticketing Course"],
     alternates: { canonical: "/contact" },
     openGraph: {
-      title: `${title} | ${seo.siteName}`,
+      title: `${title} | ${seo?.siteName || 'GDS Training'}`,
       description,
-      url: `${seo.siteUrl}/contact`
+      url: `${seo?.siteUrl || 'https://gds-training.vercel.app'}/contact`
     },
     twitter: { card: "summary", title, description }
   };
@@ -26,6 +26,19 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ContactPage() {
   const profile = await getProfile();
+  
+  const profileData = profile || {
+    phone: "",
+    email: "",
+    whatsapp: "",
+    address: {
+      street: "",
+      city: "",
+      region: "",
+      postalCode: "",
+      country: ""
+    }
+  };
 
   return (
     <section className="mx-auto grid max-w-6xl gap-6 px-4 py-14 md:grid-cols-2 md:px-6">
@@ -36,18 +49,18 @@ export default async function ContactPage() {
         </p>
         <div className="mt-5 space-y-2 text-sm text-ink/90">
           <p>
-            <strong>Phone:</strong> {profile.phone}
+            <strong>Phone:</strong> {profileData.phone || "N/A"}
           </p>
           <p>
-            <strong>Email:</strong> {profile.email}
+            <strong>Email:</strong> {profileData.email || "N/A"}
           </p>
           <p>
-            <strong>Address:</strong> {profile.address.street}, {profile.address.city}
+            <strong>Address:</strong> {profileData.address?.street || ""}, {profileData.address?.city || ""}
           </p>
-          <a href={profile.whatsapp} className="inline-flex rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-4 py-2 font-semibold text-white">
+          <a href={profileData.whatsapp || "#"} className="inline-flex rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-4 py-2 font-semibold text-white">
             Chat on WhatsApp
           </a>
-          <a href={`mailto:${profile.email}`} className="ml-2 inline-flex rounded-full border border-aviation-600 px-4 py-2 font-semibold text-aviation-700">
+          <a href={`mailto:${profileData.email || ""}`} className="ml-2 inline-flex rounded-full border border-aviation-600 px-4 py-2 font-semibold text-aviation-700">
             Email Admissions
           </a>
         </div>

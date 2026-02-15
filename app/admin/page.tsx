@@ -43,16 +43,16 @@ export default async function AdminPage() {
 
   return (
     <AdminDashboard
-      users={users}
-      registrations={registrations}
-      bookings={bookings}
-      courses={courses}
-      blogs={blogs}
-      projects={projects}
-      seoGlobal={seoGlobal}
-      seoPages={seoPages}
-      profile={profile}
-      portfolioProfile={portfolioProfile}
+      users={users || []}
+      registrations={registrations || []}
+      bookings={bookings || []}
+      courses={courses || []}
+      blogs={blogs || []}
+      projects={projects || []}
+      seoGlobal={seoGlobal || {}}
+      seoPages={seoPages || []}
+      profile={profile || {}}
+      portfolioProfile={portfolioProfile || {}}
     />
   );
 }
