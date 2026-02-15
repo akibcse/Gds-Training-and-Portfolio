@@ -37,7 +37,7 @@ type Props = {
   portfolioProfile: PortfolioProfileRecord;
 };
 
-type Tab = "courses" | "blogs" | "portfolio" | "about" | "leads" | "seo";
+type Tab = "courses" | "blogs" | "portfolio" | "about" | "leads" | "seo" | "settings" | "navigation" | "footer";
 
 type Toast = { id: string; type: "success" | "error"; message: string };
 
@@ -815,7 +815,7 @@ export default function AdminDashboard(props: Props) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {(["courses", "blogs", "portfolio", "about", "leads", "seo"] as const).map((item) => (
+          {(["courses", "blogs", "portfolio", "about", "leads", "seo", "settings", "navigation", "footer"] as const).map((item) => (
             <button
               key={item}
               type="button"
@@ -1734,6 +1734,153 @@ export default function AdminDashboard(props: Props) {
             >
               Save SEO Settings
             </button>
+          </article>
+        )}
+
+        {tab === "settings" && (
+          <article className="space-y-4 rounded-2xl border border-aviation-100 bg-white p-5 shadow-soft">
+            <h2 className="text-xl font-semibold text-ink">Admin Settings</h2>
+            
+            <div className="space-y-4">
+              <div className="rounded-lg border border-aviation-100 p-4">
+                <h3 className="mb-3 font-semibold text-ink">Change Admin Email</h3>
+                <div className="flex gap-2">
+                  <input
+                    id="adminEmail"
+                    type="email"
+                    className="flex-1 rounded-lg border border-aviation-200 px-3 py-2 text-sm"
+                    placeholder="admin@example.com"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const email = (document.getElementById("adminEmail") as HTMLInputElement).value;
+                      if (!email) return;
+                      try {
+                        const res = await fetch("/api/admin/email", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ email })
+                        });
+                        if (res.ok) {
+                          addToast("success", "Email updated!");
+                          (document.getElementById("adminEmail") as HTMLInputElement).value = "";
+                        } else {
+                          const data = await res.json();
+                          addToast("error", data.error || "Failed");
+                        }
+                      } catch {
+                        addToast("error", "Error updating email");
+                      }
+                    }}
+                    className="rounded-lg bg-aviation-600 px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    Update Email
+                  </button>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-aviation-100 p-4">
+                <h3 className="mb-3 font-semibold text-ink">Change Password</h3>
+                <div className="space-y-2">
+                  <input
+                    id="currentPassword"
+                    type="password"
+                    className="w-full rounded-lg border border-aviation-200 px-3 py-2 text-sm"
+                    placeholder="Current Password"
+                  />
+                  <input
+                    id="newPassword"
+                    type="password"
+                    className="w-full rounded-lg border border-aviation-200 px-3 py-2 text-sm"
+                    placeholder="New Password"
+                  />
+                  <input
+                    id="confirmPassword"
+                    type="password"
+                    className="w-full rounded-lg border border-aviation-200 px-3 py-2 text-sm"
+                    placeholder="Confirm New Password"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const current = (document.getElementById("currentPassword") as HTMLInputElement).value;
+                      const newPass = (document.getElementById("newPassword") as HTMLInputElement).value;
+                      const confirm = (document.getElementById("confirmPassword") as HTMLInputElement).value;
+                      if (!current || !newPass || !confirm) {
+                        addToast("error", "All fields required");
+                        return;
+                      }
+                      if (newPass !== confirm) {
+                        addToast("error", "Passwords don't match");
+                        return;
+                      }
+                      try {
+                        const res = await fetch("/api/admin/password", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ currentPassword: current, newPassword: newPass, confirmPassword: confirm })
+                        });
+                        if (res.ok) {
+                          addToast("success", "Password changed!");
+                          (document.getElementById("currentPassword") as HTMLInputElement).value = "";
+                          (document.getElementById("newPassword") as HTMLInputElement).value = "";
+                          (document.getElementById("confirmPassword") as HTMLInputElement).value = "";
+                        } else {
+                          const data = await res.json();
+                          addToast("error", data.error || "Failed");
+                        }
+                      } catch {
+                        addToast("error", "Error changing password");
+                      }
+                    }}
+                    className="rounded-lg bg-aviation-600 px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    Change Password
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+        )}
+
+        {tab === "navigation" && (
+          <article className="space-y-4 rounded-2xl border border-aviation-100 bg-white p-5 shadow-soft">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-ink">Navigation Management</h2>
+              <a href="/admin/navigation" className="rounded-lg bg-aviation-600 px-4 py-2 text-sm font-semibold text-white">
+                Open Full Editor
+              </a>
+            </div>
+            <p className="text-sm text-ink/70">
+              Manage your navbar items. Click "Open Full Editor" for more options like reordering, deleting, and toggling visibility.
+            </p>
+            <a
+              href="/admin/navigation"
+              className="inline-block rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-6 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Manage Navigation
+            </a>
+          </article>
+        )}
+
+        {tab === "footer" && (
+          <article className="space-y-4 rounded-2xl border border-aviation-100 bg-white p-5 shadow-soft">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-ink">Footer Management</h2>
+              <a href="/admin/footer" className="rounded-lg bg-aviation-600 px-4 py-2 text-sm font-semibold text-white">
+                Open Full Editor
+              </a>
+            </div>
+            <p className="text-sm text-ink/70">
+              Manage your footer sections. Click "Open Full Editor" for more options like adding, editing, deleting sections.
+            </p>
+            <a
+              href="/admin/footer"
+              className="inline-block rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-6 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Manage Footer
+            </a>
           </article>
         )}
       </section>
