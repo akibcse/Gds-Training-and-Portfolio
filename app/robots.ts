@@ -2,7 +2,16 @@ import type { MetadataRoute } from "next";
 import { getSeo } from "@/lib/getData";
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const seo = await getSeo();
+  const DEFAULT_URL = "https://gds-training.vercel.app";
+  
+  let siteUrl = DEFAULT_URL;
+  
+  try {
+    const seo = await getSeo();
+    siteUrl = seo?.siteUrl || DEFAULT_URL;
+  } catch (e) {
+    console.error("Robots: Failed to get SEO settings", e);
+  }
 
   return {
     rules: [
@@ -12,7 +21,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         disallow: ["/api/", "/admin/"]
       }
     ],
-    sitemap: `${seo.siteUrl}/sitemap.xml`,
-    host: seo.siteUrl
+    sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl
   };
 }
