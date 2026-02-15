@@ -144,7 +144,9 @@ export const FILES = {
 } as const;
 
 export const getCourses = async () => await readJsonFileOrDefault<CourseRecord[]>(FILES.courses, []);
+export const setCourses = async (rows: CourseRecord[]) => await writeJsonFile(FILES.courses, rows);
 export const getBlogs = async () => await readJsonFileOrDefault<BlogRecord[]>(FILES.blogs, []);
+export const setBlogs = async (rows: BlogRecord[]) => await writeJsonFile(FILES.blogs, rows);
 export const getProjects = async () => await readJsonFileOrDefault<PortfolioProject[]>(FILES.projects, []);
 export const setProjects = async (rows: PortfolioProject[]) => await writeJsonFile(FILES.projects, rows);
 export const getLeadUsers = async () => await readJsonFileOrDefault<LeadUser[]>(FILES.users, []);
