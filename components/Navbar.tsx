@@ -1,17 +1,39 @@
 import Link from "next/link";
 import { getProfile } from "@/lib/getData";
+import { readJsonFile } from "@/lib/storage";
 
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/courses", label: "Courses" },
-  { href: "/blog", label: "Blog" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" }
+type NavbarItem = {
+  id: string;
+  label: string;
+  url: string;
+  order: number;
+  isActive: boolean;
+};
+
+const DEFAULT_NAVBAR: NavbarItem[] = [
+  { id: "1", label: "Home", url: "/", order: 1, isActive: true },
+  { id: "2", label: "Courses", url: "/courses", order: 2, isActive: true },
+  { id: "3", label: "Blog", url: "/blog", order: 3, isActive: true },
+  { id: "4", label: "Portfolio", url: "/portfolio", order: 4, isActive: true },
+  { id: "5", label: "About", url: "/about", order: 5, isActive: true },
+  { id: "6", label: "Contact", url: "/contact", order: 6, isActive: true }
 ];
+
+const getNavbarItems = async (): Promise<NavbarItem[]> => {
+  try {
+    const items = await readJsonFile<NavbarItem[]>("navbar.json");
+    if (!items || items.length === 0) {
+      return DEFAULT_NAVBAR;
+    }
+    return items.filter(item => item.isActive).sort((a, b) => a.order - b.order);
+  } catch {
+    return DEFAULT_NAVBAR;
+  }
+};
 
 export default async function Navbar() {
   const profile = await getProfile();
+  const navItems = await getNavbarItems();
 
   return (
     <header className="sticky top-0 z-50 border-b border-aviation-100/70 bg-white/85 backdrop-blur">
@@ -20,8 +42,8 @@ export default async function Navbar() {
           {profile.name}
         </Link>
         <div className="hidden items-center gap-5 text-sm font-medium text-ink/80 md:flex">
-          {links.map((link) => (
-            <Link key={link.href} href={link.href} className="transition hover:text-aviation-600">
+          {navItems.map((link) => (
+            <Link key={link.id} href={link.url} className="transition hover:text-aviation-600">
               {link.label}
             </Link>
           ))}
