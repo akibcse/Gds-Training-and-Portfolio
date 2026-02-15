@@ -341,7 +341,7 @@ export default function AdminDashboard(props: Props) {
   };
 
   const logout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
     window.location.href = "/admin/login";
   };
 
@@ -388,6 +388,7 @@ export default function AdminDashboard(props: Props) {
     const response = await fetch("/api/admin/courses", {
       method,
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(payload)
     });
 
@@ -482,6 +483,7 @@ export default function AdminDashboard(props: Props) {
     const response = await fetch("/api/admin/blogs", {
       method,
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(payload)
     });
     const result = (await response.json()) as { error?: string; blog?: BlogRecord };
@@ -573,6 +575,7 @@ export default function AdminDashboard(props: Props) {
     const response = await fetch("/api/admin/portfolio", {
       method,
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(payload)
     });
     const result = (await response.json()) as { error?: string; project?: PortfolioProject };
@@ -621,6 +624,7 @@ export default function AdminDashboard(props: Props) {
     const response = await fetch("/api/admin/leads", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ id, status })
     });
 
@@ -668,6 +672,7 @@ export default function AdminDashboard(props: Props) {
     const response = await fetch("/api/admin/seo", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ global: seoGlobal, pages })
     });
 
@@ -779,6 +784,7 @@ export default function AdminDashboard(props: Props) {
     const response = await fetch("/api/admin/about", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(payload)
     });
 
@@ -1760,6 +1766,7 @@ export default function AdminDashboard(props: Props) {
                         const res = await fetch("/api/admin/email", {
                           method: "PATCH",
                           headers: { "Content-Type": "application/json" },
+                          credentials: "include",
                           body: JSON.stringify({ email })
                         });
                         if (res.ok) {
@@ -1819,6 +1826,7 @@ export default function AdminDashboard(props: Props) {
                         const res = await fetch("/api/admin/password", {
                           method: "PATCH",
                           headers: { "Content-Type": "application/json" },
+                          credentials: "include",
                           body: JSON.stringify({ currentPassword: current, newPassword: newPass, confirmPassword: confirm })
                         });
                         if (res.ok) {

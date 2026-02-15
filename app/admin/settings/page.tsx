@@ -20,7 +20,7 @@ export default function AdminSettingsPage() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch("/api/admin/leads");
+      const res = await fetch("/api/admin/leads", { credentials: "include" });
       if (res.status === 401) {
         router.push("/admin/login");
         return;
@@ -33,7 +33,7 @@ export default function AdminSettingsPage() {
 
   const fetchEmail = async () => {
     try {
-      const res = await fetch("/api/admin/email");
+      const res = await fetch("/api/admin/email", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setEmail(data.email || "");
@@ -55,6 +55,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/email", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email })
       });
 
@@ -94,6 +95,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/password", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           currentPassword,
           newPassword,

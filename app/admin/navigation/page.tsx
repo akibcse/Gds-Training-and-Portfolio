@@ -28,7 +28,7 @@ export default function AdminNavigationPage() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch("/api/admin/leads");
+      const res = await fetch("/api/admin/leads", { credentials: "include" });
       if (res.status === 401) {
         router.push("/admin/login");
         return;
@@ -41,7 +41,7 @@ export default function AdminNavigationPage() {
 
   const fetchItems = async () => {
     try {
-      const res = await fetch("/api/admin/navbar");
+      const res = await fetch("/api/admin/navbar", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setItems(data);
@@ -66,6 +66,7 @@ export default function AdminNavigationPage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(editingItem ? { ...editingItem, ...form } : form)
       });
 
@@ -98,12 +99,13 @@ export default function AdminNavigationPage() {
     
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/navbar?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/navbar?id=${id}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
+        setItems(prev => prev.filter(item => item.id !== id));
         setSuccess("Item deleted!");
-        fetchItems();
       } else {
-        setError("Failed to delete");
+        const data = await res.json();
+        setError(data.error || "Failed to delete");
       }
     } catch {
       setError("An error occurred");
@@ -118,10 +120,11 @@ export default function AdminNavigationPage() {
       const res = await fetch("/api/admin/navbar", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ ...item, isActive: !item.isActive })
       });
       if (res.ok) {
-        fetchItems();
+        setItems(prev => prev.map(i => i.id === item.id ? { ...i, isActive: !i.isActive } : i));
       }
     } catch {
       setError("Failed to update");

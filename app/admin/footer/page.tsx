@@ -28,7 +28,7 @@ export default function AdminFooterPage() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch("/api/admin/leads");
+      const res = await fetch("/api/admin/leads", { credentials: "include" });
       if (res.status === 401) {
         router.push("/admin/login");
         return;
@@ -41,7 +41,7 @@ export default function AdminFooterPage() {
 
   const fetchSections = async () => {
     try {
-      const res = await fetch("/api/admin/footer");
+      const res = await fetch("/api/admin/footer", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setSections(data);
@@ -66,6 +66,7 @@ export default function AdminFooterPage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(editingSection ? { ...editingSection, ...form } : form)
       });
 
@@ -98,12 +99,13 @@ export default function AdminFooterPage() {
     
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/footer?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/footer?id=${id}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
+        setSections(prev => prev.filter(s => s.id !== id));
         setSuccess("Section deleted!");
-        fetchSections();
       } else {
-        setError("Failed to delete");
+        const data = await res.json();
+        setError(data.error || "Failed to delete");
       }
     } catch {
       setError("An error occurred");
@@ -118,10 +120,11 @@ export default function AdminFooterPage() {
       const res = await fetch("/api/admin/footer", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ ...section, isActive: !section.isActive })
       });
       if (res.ok) {
-        fetchSections();
+        setSections(prev => prev.map(s => s.id === section.id ? { ...s, isActive: !s.isActive } : s));
       }
     } catch {
       setError("Failed to update");
