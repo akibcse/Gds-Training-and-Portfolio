@@ -59,16 +59,23 @@ export async function DELETE(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+  const type = searchParams.get("type") || "user";
+
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
 
-  const users = await readJsonFile<UserRecord[]>("users.json");
-  const next = users.filter((user) => user.id !== id);
-  if (next.length === users.length) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  let fileName = "users.json";
+  if (type === "registration") fileName = "registrations.json";
+  if (type === "booking") fileName = "bookings.json";
+
+  const data = await readJsonFile<any[]>(fileName);
+  const next = data.filter((item) => item.id !== id);
+
+  if (next.length === data.length) {
+    return NextResponse.json({ error: "Item not found" }, { status: 404 });
   }
 
-  await writeJsonFile("users.json", next);
+  await writeJsonFile(fileName, next);
   return NextResponse.json({ success: true });
 }
