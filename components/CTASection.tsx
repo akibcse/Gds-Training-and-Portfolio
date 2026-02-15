@@ -22,7 +22,7 @@ export default function CTASection({ heading, copy }: Props) {
 
         <div className="relative z-10 mt-5 flex flex-wrap gap-3">
           <motion.a
-            href="#lead-form"
+            href="/#lead-form"
             whileHover={reduce ? undefined : { scale: 1.04 }}
             whileTap={reduce ? undefined : { scale: 0.97 }}
             className="animate-pulseGlow rounded-full bg-cta-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cta-600"

@@ -57,7 +57,7 @@ export default function Hero({
           <p className="mt-4 max-w-xl text-sm text-white/90 md:text-base">{description}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a
-              href="#lead-form"
+              href="/#lead-form"
               className="animate-pulseGlow rounded-full bg-cta-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-cta-600"
             >
               Enroll Now

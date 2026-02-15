@@ -325,6 +325,7 @@ export default function AdminDashboard(props: Props) {
   };
 
   const setCourseFromRecord = (course: CourseRecord) => {
+    setEditingCourseId(course.id);
     setCourseForm({
       title: course.title || "",
       slug: course.slug || "",

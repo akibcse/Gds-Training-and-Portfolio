@@ -26,14 +26,14 @@ export default async function Navbar() {
             </Link>
           ))}
           <a
-            href="#lead-form"
+            href="/#lead-form"
             className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-4 py-2 text-white shadow-soft transition hover:brightness-105"
           >
             Enroll Now
           </a>
         </div>
         <a
-          href="#lead-form"
+          href="/#lead-form"
           className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-3 py-1.5 text-xs font-semibold text-white shadow-soft md:hidden"
         >
           Enroll
