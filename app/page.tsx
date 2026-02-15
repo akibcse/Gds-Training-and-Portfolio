@@ -9,7 +9,7 @@ import SEO from "@/components/SEO";
 import StickyEnrollBar from "@/components/StickyEnrollBar";
 import TestimonialCard from "@/components/TestimonialCard";
 import { getCourses, getPortfolio, getProfile, getSeo, getTestimonials } from "@/lib/getData";
-import { faqSchema, localBusinessSchema, personSchema } from "@/lib/structuredData";
+import { faqSchema, localBusinessSchema, organizationSchema, personSchema, websiteSchema } from "@/lib/structuredData";
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +42,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <SEO id="org-schema" data={organizationSchema(profile, seo.siteUrl)} />
+      <SEO id="site-schema" data={websiteSchema(seo.siteUrl)} />
       <SEO id="person-schema" data={personSchema(profile, seo.siteUrl)} />
       <SEO id="local-business-schema" data={localBusinessSchema(profile, seo.siteUrl)} />
       <SEO id="home-faq-schema" data={faqSchema(homeFaqs)} />

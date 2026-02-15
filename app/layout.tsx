@@ -25,7 +25,7 @@ const serif = Merriweather({
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeo();
   const siteUrl = seo?.siteUrl || 'https://gds-training.vercel.app';
-  
+
   return {
     metadataBase: new URL(siteUrl),
     title: {
@@ -34,8 +34,23 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: seo?.defaultDescription || 'GDS Training in Dhaka',
     keywords: seo?.defaultKeywords || [],
+    verification: {
+      google: "8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     alternates: {
-      canonical: "/"
+      canonical: siteUrl
     },
     openGraph: {
       title: seo.defaultTitle,
@@ -43,7 +58,15 @@ export async function generateMetadata(): Promise<Metadata> {
       url: seo.siteUrl,
       siteName: seo.siteName,
       locale: seo.locale,
-      type: "website"
+      type: "website",
+      images: [
+        {
+          url: `${siteUrl}/api/og?title=${encodeURIComponent(seo.siteName)}`,
+          width: 1200,
+          height: 630,
+          alt: seo.siteName,
+        }
+      ]
     },
     twitter: {
       card: seo.twitterCard ?? "summary_large_image",
@@ -54,13 +77,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+export const viewport = {
+  themeColor: "#0891b2",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
-      <head>
-        <meta name="google-site-verification" content="8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0" />
-        <meta name="robots" content="index, follow" />
-      </head>
       <body className="font-[var(--font-sans)] text-ink">
         <Navbar />
         <PageTransition>

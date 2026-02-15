@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: override?.metaTitle || title,
     description: override?.metaDescription || description,
     keywords: override?.keywords?.length ? override.keywords : course.keywords,
-    alternates: { canonical: override?.canonicalUrl || `/courses/${course.slug}` },
+    alternates: { canonical: override?.canonicalUrl || `${seo.siteUrl}/courses/${course.slug}` },
     openGraph: {
       title: override?.ogTitle || `${title} | ${seo.siteName}`,
       description: override?.ogDescription || description,

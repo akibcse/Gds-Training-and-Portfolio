@@ -28,14 +28,16 @@ export default function Hero({
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <img
+        <Image
           src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920&q=80"
-          alt="Background"
-          className="h-full w-full object-cover"
+          alt="Airlines Background"
+          fill
+          className="object-cover"
+          priority
         />
         <div className="absolute inset-0 bg-gradient-to-r from-aviation-900/90 via-aviation-800/85 to-aviation-900/90" />
         <div className="absolute inset-0 bg-gradient-to-t from-aviation-900/60 via-transparent to-aviation-900/40" />
-        <div className="absolute inset-0 opacity-20" style={{backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`, backgroundSize: "60px 60px"}} />
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`, backgroundSize: "60px 60px" }} />
       </div>
       <div className="hero-gradient animate-gradientShift relative z-10 mx-auto grid max-w-6xl gap-8 px-5 pb-10 pt-14 text-white md:grid-cols-2 md:px-10">
         <motion.div
@@ -85,13 +87,14 @@ export default function Hero({
             className="glass-card relative h-72 w-72 overflow-hidden rounded-3xl"
           >
             <Image
-              src={profileImage}
+              src={profileImage || "/placeholder-avatar.png"}
               alt={instructorName}
-              fill
-              className="object-cover"
+              width={400}
+              height={400}
+              className="h-full w-full object-cover transition-transform duration-700 hover:scale-110"
+              priority={true}
               sizes="(max-width: 1024px) 240px, 288px"
               unoptimized={isRemoteImage}
-              priority
             />
             <motion.div
               className="absolute -left-5 top-8 rounded-full bg-white/20 p-3"
