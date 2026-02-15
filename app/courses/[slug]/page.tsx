@@ -46,14 +46,16 @@ export default async function CoursePage({ params }: Props) {
     notFound();
   }
 
-  const relatedBlogs = (
-    await Promise.all(course.relatedBlogSlugs.map((relatedSlug) => getBlogBySlug(relatedSlug)))
-  ).filter((blog): blog is NonNullable<typeof blog> => Boolean(blog));
+  const relatedBlogs = course.relatedBlogSlugs 
+    ? (
+        await Promise.all(course.relatedBlogSlugs.map((relatedSlug) => getBlogBySlug(relatedSlug)))
+      ).filter((blog): blog is NonNullable<typeof blog> => Boolean(blog))
+    : [];
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-14 md:px-6">
       <SEO id="course-schema" data={courseSchema(course, seo.siteUrl)} />
-      <SEO id="course-faq-schema" data={faqSchema(course.faqs)} />
+      <SEO id="course-faq-schema" data={faqSchema(course.faqs || [])} />
       <SEO
         id="course-breadcrumb-schema"
         data={breadcrumbSchema([
@@ -76,21 +78,21 @@ export default async function CoursePage({ params }: Props) {
         <article className="rounded-2xl border border-aviation-100 bg-white p-6 md:col-span-2">
           <h2 className="text-2xl font-semibold text-ink">Course Curriculum Overview</h2>
           <ul className="mt-3 list-disc space-y-2 pl-6 text-sm text-ink/85">
-            {course.curriculum.map((item) => (
+            {course.curriculum?.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
 
           <h2 className="mt-8 text-2xl font-semibold text-ink">Career Outcomes</h2>
           <ul className="mt-3 list-disc space-y-2 pl-6 text-sm text-ink/85">
-            {course.careerOutcomes.map((item) => (
+            {course.careerOutcomes?.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
 
           <h2 className="mt-8 text-2xl font-semibold text-ink">Frequently Asked Questions</h2>
           <div className="mt-4 space-y-3">
-            {course.faqs.map((faq) => (
+            {course.faqs?.map((faq) => (
               <div key={faq.question} className="rounded-xl border border-aviation-100 p-4">
                 <h3 className="font-semibold text-ink">{faq.question}</h3>
                 <p className="mt-2 text-sm text-ink/80">{faq.answer}</p>
