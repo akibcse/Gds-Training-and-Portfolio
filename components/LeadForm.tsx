@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useState, useEffect } from "react";
 
 type FormState = {
   name: string;
@@ -22,6 +22,12 @@ export default function LeadForm() {
   const [form, setForm] = useState<FormState>(initialState);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    setError("");
+    setSuccess("");
+  }, []);
 
   const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -31,41 +37,51 @@ export default function LeadForm() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsSubmitting(true);
+    setError("");
+    setSuccess("");
 
     if (!form.name || !form.email || !form.phone) {
       setError("Please complete all required fields for enrollment assistance.");
+      setIsSubmitting(false);
       return;
     }
 
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
     if (!emailValid) {
       setError("Please enter a valid email address.");
+      setIsSubmitting(false);
       return;
     }
 
-    const response = await fetch("/api/leads", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        course: form.course,
-        type: form.leadType
-      })
-    });
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          course: form.course,
+          type: form.leadType
+        })
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
+        throw new Error("Failed to submit");
+      }
+
+      setSuccess(
+        form.leadType === "booking"
+          ? "Thanks! Your demo booking is submitted. Our advisor will contact you shortly."
+          : "Thanks! Your registration request has been captured. Our advisor will contact you shortly."
+      );
+      setForm(initialState);
+    } catch (err) {
       setError("Could not save your request. Please try again.");
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setSuccess(
-      form.leadType === "booking"
-        ? "Thanks! Your demo booking is submitted. Our advisor will contact you shortly."
-        : "Thanks! Your registration request has been captured. Our advisor will contact you shortly."
-    );
-    setForm(initialState);
   };
 
   return (
@@ -122,8 +138,8 @@ export default function LeadForm() {
       </div>
       {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
       {success ? <p className="text-xs font-medium text-aviation-700">{success}</p> : null}
-      <button type="submit" className="w-full rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105">
-        Enroll Now
+      <button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-50">
+        {isSubmitting ? "Submitting..." : "Enroll Now"}
       </button>
     </form>
   );
