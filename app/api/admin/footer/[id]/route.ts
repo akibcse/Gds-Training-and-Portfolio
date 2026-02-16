@@ -2,11 +2,14 @@ import { NextResponse } from "next/server";
 import { readJsonFile, writeJsonFile } from "@/lib/storage";
 import { isAdminAuthenticated } from "@/lib/admin";
 
+console.log("Footer [id] route module loaded");
+
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   console.log("DELETE /api/admin/footer/[id] called");
+  console.log("Params:", params);
   
   const isAuth = await isAdminAuthenticated();
   console.log("Is authenticated:", isAuth);
