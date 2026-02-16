@@ -60,8 +60,8 @@ export default function AdminNavigationPage() {
     setSuccess("");
 
     try {
-      const url = editingItem ? "/api/admin/navbar" : "/api/admin/navbar";
-      const method = editingItem ? "PATCH" : "POST";
+      const method = editingItem ? "PUT" : "POST";
+      const url = editingItem ? `/api/admin/navbar/${editingItem.id}` : "/api/admin/navbar";
       
       const res = await fetch(url, {
         method,
@@ -99,7 +99,7 @@ export default function AdminNavigationPage() {
     
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/navbar?id=${id}`, { method: "DELETE", credentials: "include" });
+      const res = await fetch(`/api/admin/navbar/${id}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
         setItems(prev => prev.filter(item => item.id !== id));
         setSuccess("Item deleted!");
@@ -117,11 +117,12 @@ export default function AdminNavigationPage() {
   const handleToggleActive = async (item: NavbarItem) => {
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/navbar", {
-        method: "PATCH",
+      const updatedData = { ...item, isActive: !item.isActive };
+      const res = await fetch(`/api/admin/navbar/${item.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ ...item, isActive: !item.isActive })
+        body: JSON.stringify(updatedData)
       });
       if (res.ok) {
         setItems(prev => prev.map(i => i.id === item.id ? { ...i, isActive: !i.isActive } : i));

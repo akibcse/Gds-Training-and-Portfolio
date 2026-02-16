@@ -60,8 +60,8 @@ export default function AdminFooterPage() {
     setSuccess("");
 
     try {
-      const url = editingSection ? "/api/admin/footer" : "/api/admin/footer";
-      const method = editingSection ? "PATCH" : "POST";
+      const method = editingSection ? "PUT" : "POST";
+      const url = editingSection ? `/api/admin/footer/${editingSection.id}` : "/api/admin/footer";
       
       const res = await fetch(url, {
         method,
@@ -99,7 +99,7 @@ export default function AdminFooterPage() {
     
     setSaving(true);
     try {
-      const res = await fetch(`/api/admin/footer?id=${id}`, { method: "DELETE", credentials: "include" });
+      const res = await fetch(`/api/admin/footer/${id}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
         setSections(prev => prev.filter(s => s.id !== id));
         setSuccess("Section deleted!");
@@ -117,11 +117,12 @@ export default function AdminFooterPage() {
   const handleToggleActive = async (section: FooterSection) => {
     setSaving(true);
     try {
-      const res = await fetch("/api/admin/footer", {
-        method: "PATCH",
+      const updatedData = { ...section, isActive: !section.isActive };
+      const res = await fetch(`/api/admin/footer/${section.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ ...section, isActive: !section.isActive })
+        body: JSON.stringify(updatedData)
       });
       if (res.ok) {
         setSections(prev => prev.map(s => s.id === section.id ? { ...s, isActive: !s.isActive } : s));
