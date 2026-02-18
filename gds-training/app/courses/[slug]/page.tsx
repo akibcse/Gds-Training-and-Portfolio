@@ -48,7 +48,7 @@ export default async function CoursePage({ params }: Props) {
 
   const relatedBlogs = course.relatedBlogSlugs 
     ? (
-        await Promise.all(course.relatedBlogSlugs.map((relatedSlug) => getBlogBySlug(relatedSlug)))
+        await Promise.all(course.relatedBlogSlugs.map((relatedSlug: string) => getBlogBySlug(relatedSlug)))
       ).filter((blog): blog is NonNullable<typeof blog> => Boolean(blog))
     : [];
 
@@ -88,21 +88,21 @@ export default async function CoursePage({ params }: Props) {
         <article className="rounded-2xl border border-aviation-100 bg-white p-6 md:col-span-2">
           <h2 className="text-2xl font-semibold text-ink">Course Curriculum Overview</h2>
           <ul className="mt-3 list-disc space-y-2 pl-6 text-sm text-ink/85">
-            {course.curriculum?.map((item) => (
+            {course.curriculum?.map((item: string) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
 
           <h2 className="mt-8 text-2xl font-semibold text-ink">Career Outcomes</h2>
           <ul className="mt-3 list-disc space-y-2 pl-6 text-sm text-ink/85">
-            {course.careerOutcomes?.map((item) => (
+            {course.careerOutcomes?.map((item: string) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
 
           <h2 className="mt-8 text-2xl font-semibold text-ink">Frequently Asked Questions</h2>
           <div className="mt-4 space-y-3">
-            {course.faqs?.map((faq) => (
+            {course.faqs?.map((faq: { question: string; answer: string }) => (
               <div key={faq.question} className="rounded-xl border border-aviation-100 p-4">
                 <h3 className="font-semibold text-ink">{faq.question}</h3>
                 <p className="mt-2 text-sm text-ink/80">{faq.answer}</p>
@@ -112,7 +112,7 @@ export default async function CoursePage({ params }: Props) {
 
           <h2 className="mt-8 text-2xl font-semibold text-ink">Related Blogs</h2>
           <div className="mt-3 space-y-2 text-sm text-aviation-700">
-            {relatedBlogs.map((blog) => (
+            {relatedBlogs.map((blog: { slug: string; title: string }) => (
               <Link key={blog.slug} href={`/blog/${blog.slug}`} className="block underline">
                 {blog.title}
               </Link>
