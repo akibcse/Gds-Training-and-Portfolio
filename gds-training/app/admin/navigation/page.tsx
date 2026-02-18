@@ -1,88 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-
-type NavbarItem = {
-  id: string;
-  label: string;
-  url: string;
-  order: number;
-  isActive: boolean;
-};
+import { useState } from "react";
+import { useNavbar, type NavbarItem } from "@/lib/hooks/useNavbar";
 
 export default function AdminNavigationPage() {
-  const router = useRouter();
-  const [items, setItems] = useState<NavbarItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items, loading, error, addItem, updateItem, deleteItem } = useNavbar();
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [message, setMessage] = useState("");
   const [editingItem, setEditingItem] = useState<NavbarItem | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [form, setForm] = useState({ label: "", url: "", order: 0, isActive: true });
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const res = await fetch("/api/admin/leads", { credentials: "include" });
-      if (res.status === 401) {
-        router.push("/admin/login");
-        return;
-      }
-      fetchItems();
-    } catch {
-      router.push("/admin/login");
-    }
-  };
-
-  const fetchItems = async () => {
-    try {
-      const res = await fetch("/api/admin/navbar", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setItems(data);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const resetForm = () => {
+    setForm({ label: "", url: "", order: items.length + 1, isActive: true });
+    setEditingItem(null);
+    setIsAdding(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError("");
-    setSuccess("");
+    setMessage("");
 
     try {
-      const method = editingItem ? "PUT" : "POST";
-      const url = editingItem ? `/api/admin/navbar/${editingItem.id}` : "/api/admin/navbar";
-      
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(editingItem ? { ...editingItem, ...form } : form)
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Failed to save");
-        return;
+      if (editingItem) {
+        await updateItem(editingItem.id, form);
+        setMessage("Navigation item updated.");
+      } else {
+        await addItem(form);
+        setMessage("Navigation item added.");
       }
-
-      setSuccess(editingItem ? "Item updated!" : "Item added!");
-      setForm({ label: "", url: "", order: 0, isActive: true });
-      setEditingItem(null);
-      setIsAdding(false);
-      fetchItems();
-    } catch {
-      setError("An error occurred");
+      resetForm();
+    } catch (submitError) {
+      setMessage(submitError instanceof Error ? submitError.message : "Failed to save item.");
     } finally {
       setSaving(false);
     }
@@ -90,76 +40,76 @@ export default function AdminNavigationPage() {
 
   const handleEdit = (item: NavbarItem) => {
     setEditingItem(item);
-    setForm({ label: item.label, url: item.url, order: item.order, isActive: item.isActive });
+    setForm({
+      label: item.label,
+      url: item.url,
+      order: item.order,
+      isActive: item.isActive
+    });
     setIsAdding(true);
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this item?")) return;
-    
+    if (!confirm("Delete this navigation item?")) {
+      return;
+    }
+
     setSaving(true);
+    setMessage("");
     try {
-      const res = await fetch(`/api/admin/navbar/${id}`, { method: "DELETE", credentials: "include" });
-      if (res.ok) {
-        setItems(prev => prev.filter(item => item.id !== id));
-        setSuccess("Item deleted!");
-      } else {
-        const data = await res.json();
-        setError(data.error || "Failed to delete");
-      }
+      await deleteItem(id);
+      setMessage("Navigation item deleted.");
     } catch {
-      setError("An error occurred");
+      setMessage("Failed to delete item.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleToggleActive = async (item: NavbarItem) => {
+  const toggleActive = async (item: NavbarItem) => {
     setSaving(true);
+    setMessage("");
     try {
-      const updatedData = { ...item, isActive: !item.isActive };
-      const res = await fetch(`/api/admin/navbar/${item.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(updatedData)
-      });
-      if (res.ok) {
-        setItems(prev => prev.map(i => i.id === item.id ? { ...i, isActive: !i.isActive } : i));
-      }
+      await updateItem(item.id, { isActive: !item.isActive });
     } catch {
-      setError("Failed to update");
+      setMessage("Failed to change status.");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (loading) {
+    return <div className="p-8 text-center text-sm text-ink/70">Loading navigation items...</div>;
+  }
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-5xl p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-ink">Navigation Management</h1>
+        <h2 className="text-2xl font-bold text-ink">Navigation Manager</h2>
         <button
-          onClick={() => { setIsAdding(true); setEditingItem(null); setForm({ label: "", url: "", order: items.length + 1, isActive: true }); }}
+          onClick={() => {
+            setIsAdding(true);
+            setEditingItem(null);
+            setForm({ label: "", url: "", order: items.length + 1, isActive: true });
+          }}
           className="rounded-lg bg-aviation-600 px-4 py-2 text-white hover:bg-aviation-700"
         >
-          Add New Item
+          Add Item
         </button>
       </div>
 
-      {error && <div className="mb-4 rounded-lg bg-red-100 p-3 text-red-700">{error}</div>}
-      {success && <div className="mb-4 rounded-lg bg-green-100 p-3 text-green-700">{success}</div>}
+      {error ? <div className="mb-4 rounded-lg bg-red-100 p-3 text-sm text-red-700">{error}</div> : null}
+      {message ? <div className="mb-4 rounded-lg bg-aviation-50 p-3 text-sm text-aviation-700">{message}</div> : null}
 
-      {isAdding && (
+      {isAdding ? (
         <form onSubmit={handleSubmit} className="mb-6 rounded-xl border border-aviation-200 bg-white p-4">
-          <h2 className="mb-4 text-lg font-semibold">{editingItem ? "Edit Item" : "Add New Item"}</h2>
+          <h3 className="mb-4 text-lg font-semibold text-ink">{editingItem ? "Edit Item" : "Add New Item"}</h3>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-ink">Label</label>
               <input
                 value={form.label}
-                onChange={(e) => setForm({ ...form, label: e.target.value })}
+                onChange={(e) => setForm((prev) => ({ ...prev, label: e.target.value }))}
                 className="w-full rounded-lg border border-aviation-200 px-3 py-2"
                 required
               />
@@ -168,7 +118,7 @@ export default function AdminNavigationPage() {
               <label className="mb-1 block text-sm font-medium text-ink">URL</label>
               <input
                 value={form.url}
-                onChange={(e) => setForm({ ...form, url: e.target.value })}
+                onChange={(e) => setForm((prev) => ({ ...prev, url: e.target.value }))}
                 className="w-full rounded-lg border border-aviation-200 px-3 py-2"
                 required
               />
@@ -178,77 +128,69 @@ export default function AdminNavigationPage() {
               <input
                 type="number"
                 value={form.order}
-                onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })}
+                onChange={(e) => setForm((prev) => ({ ...prev, order: Number(e.target.value) || 0 }))}
                 className="w-full rounded-lg border border-aviation-200 px-3 py-2"
               />
             </div>
-            <div className="flex items-center">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.isActive}
-                  onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                  className="h-4 w-4 rounded border-aviation-300"
-                />
-                <span className="text-sm text-ink">Active</span>
-              </label>
-            </div>
+            <label className="mt-6 flex items-center gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={form.isActive}
+                onChange={(e) => setForm((prev) => ({ ...prev, isActive: e.target.checked }))}
+              />
+              Active
+            </label>
           </div>
+
           <div className="mt-4 flex gap-2">
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-aviation-600 px-4 py-2 text-white hover:bg-aviation-700 disabled:opacity-50"
+              className="rounded-lg bg-aviation-600 px-4 py-2 text-white hover:bg-aviation-700 disabled:opacity-60"
             >
               {saving ? "Saving..." : "Save"}
             </button>
             <button
               type="button"
-              onClick={() => { setIsAdding(false); setEditingItem(null); }}
+              onClick={resetForm}
               className="rounded-lg border border-aviation-200 px-4 py-2 text-ink hover:bg-aviation-50"
             >
               Cancel
             </button>
           </div>
         </form>
-      )}
+      ) : null}
 
-      <div className="rounded-xl border border-aviation-200 bg-white overflow-hidden">
+      <div className="rounded-xl border border-aviation-200 bg-white p-2">
         <table className="w-full">
-          <thead className="bg-aviation-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-ink">Order</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-ink">Label</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-ink">URL</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-ink">Status</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-ink">Actions</th>
+          <thead>
+            <tr className="text-left text-sm text-ink/70">
+              <th className="px-3 py-2">Order</th>
+              <th className="px-3 py-2">Label</th>
+              <th className="px-3 py-2">URL</th>
+              <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.id} className="border-t border-aviation-100">
-                <td className="px-4 py-3 text-sm text-ink">{item.order}</td>
-                <td className="px-4 py-3 text-sm font-medium text-ink">{item.label}</td>
-                <td className="px-4 py-3 text-sm text-ink/70">{item.url}</td>
-                <td className="px-4 py-3">
+              <tr key={item.id} className="border-t border-aviation-100 text-sm">
+                <td className="px-3 py-2">{item.order}</td>
+                <td className="px-3 py-2 font-medium text-ink">{item.label}</td>
+                <td className="px-3 py-2 text-ink/70">{item.url}</td>
+                <td className="px-3 py-2">
                   <button
-                    onClick={() => handleToggleActive(item)}
-                    className={`rounded-full px-2 py-1 text-xs font-semibold ${item.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
+                    onClick={() => toggleActive(item)}
+                    className={`rounded-full px-2 py-1 text-xs ${item.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}
                   >
                     {item.isActive ? "Active" : "Inactive"}
                   </button>
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="mr-2 text-aviation-600 hover:text-aviation-800"
-                  >
+                <td className="px-3 py-2 text-right">
+                  <button onClick={() => handleEdit(item)} className="mr-2 text-aviation-600 hover:text-aviation-800">
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
+                  <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-800">
                     Delete
                   </button>
                 </td>

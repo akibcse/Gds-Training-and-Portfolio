@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { readJsonFile, writeJsonFile } from "@/lib/storage";
-import { isAdminAuthenticated } from "@/lib/admin";
+import { get, ref, remove, update } from "firebase/database";
+import { getFirebaseDatabase } from "@/lib/firebase";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const db = getFirebaseDatabase();
+  if (!db) {
+    return NextResponse.json({ error: "Database unavailable." }, { status: 500 });
   }
 
   const { id } = await params;
@@ -17,9 +23,13 @@ export async function DELETE(
     return NextResponse.json({ error: "ID is required." }, { status: 400 });
   }
 
-  const items = await readJsonFile<Array<{id: string, label: string, url: string, order: number, isActive: boolean}>>("navbar.json");
-  const filtered = items.filter((item) => item.id !== id);
-  await writeJsonFile("navbar.json", filtered);
+  const itemRef = ref(db, `navbar/${id}`);
+  const snapshot = await get(itemRef);
+  if (!snapshot.exists()) {
+    return NextResponse.json({ error: "Item not found" }, { status: 404 });
+  }
+
+  await remove(itemRef);
   revalidatePath("/");
   return NextResponse.json({ success: true });
 }
@@ -28,26 +38,39 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getFirebaseDatabase();
+  if (!db) {
+    return NextResponse.json({ error: "Database unavailable." }, { status: 500 });
+  }
+
   const { id } = await params;
-  const body = await req.json();
+  const body = (await req.json()) as Partial<{
+    label: string;
+    url: string;
+    order: number;
+    isActive: boolean;
+  }>;
 
   if (!id) {
     return NextResponse.json({ error: "ID is required." }, { status: 400 });
   }
 
-  const items = await readJsonFile<Array<{id: string, label: string, url: string, order: number, isActive: boolean}>>("navbar.json");
-  const index = items.findIndex((item) => item.id === id);
-
-  if (index === -1) {
+  const itemRef = ref(db, `navbar/${id}`);
+  const snapshot = await get(itemRef);
+  if (!snapshot.exists()) {
     return NextResponse.json({ error: "Item not found" }, { status: 404 });
   }
 
-  items[index] = { ...items[index], ...body };
-  await writeJsonFile("navbar.json", items);
+  const nextValue = {
+    ...snapshot.val(),
+    ...body
+  };
+
+  await update(itemRef, nextValue);
   revalidatePath("/");
-  return NextResponse.json(items[index]);
+  return NextResponse.json({ id, ...nextValue });
 }

@@ -1,97 +1,95 @@
 import { NextResponse } from "next/server";
-import { getProjects, setProjects, type PortfolioProject } from "@/lib/admin-data";
-import { isAdminAuthenticated } from "@/lib/admin";
+import { get, push, ref, remove, set, update } from "firebase/database";
+import { getFirebaseDatabase } from "@/lib/firebase";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 export const dynamic = 'force-dynamic';
 
-
-const normalize = (input: Partial<PortfolioProject>): PortfolioProject => {
-  const slug = (input.slug ?? "").trim().toLowerCase();
+const normalize = (input: any) => {
   return {
-    id: input.id ?? crypto.randomUUID(),
-    slug,
-    title: (input.title ?? "").trim(),
-    category: (input.category ?? "").trim(),
-    description: (input.description ?? "").trim(),
-    caseStudy: (input.caseStudy ?? "").trim(),
+    title: (input.title || "").trim(),
+    slug: (input.slug || "").trim().toLowerCase(),
+    category: (input.category || "").trim(),
+    description: (input.description || "").trim(),
+    caseStudy: (input.caseStudy || "").trim(),
     technologies: Array.isArray(input.technologies) ? input.technologies.filter(Boolean) : [],
-    imageUrl: (input.imageUrl ?? "").trim()
+    imageUrl: (input.imageUrl || "").trim()
   };
 };
 
-const validate = (project: PortfolioProject) => project.title && project.slug;
-
-export async function GET() {
-  if (!(await isAdminAuthenticated())) {
+export async function GET(request: Request) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const projects = await getProjects();
+
+  const db = getFirebaseDatabase();
+  const snapshot = await get(ref(db, "portfolio"));
+  const data = snapshot.val();
+
+  if (!data) {
+    return NextResponse.json({ projects: [] });
+  }
+
+  const projects = Object.entries(data).map(([id, value]: [string, any]) => ({
+    id,
+    ...value
+  }));
+
   return NextResponse.json({ projects });
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as Partial<PortfolioProject>;
+  const db = getFirebaseDatabase();
+  const body = await request.json();
   const row = normalize(body);
-  if (!validate(row)) {
+
+  if (!row.title || !row.slug) {
     return NextResponse.json({ error: "Title and slug are required." }, { status: 400 });
   }
 
-  const projects = await getProjects();
-  if (projects.some((item) => item.slug === row.slug)) {
-    return NextResponse.json({ error: "Slug already exists." }, { status: 409 });
-  }
+  const newRef = push(ref(db, "portfolio"));
+  await set(newRef, { ...row, createdAt: Date.now() });
 
-  await setProjects([row, ...projects]);
-  return NextResponse.json({ success: true, project: row });
+  return NextResponse.json({ success: true, project: { id: newRef.key, ...row } });
 }
 
 export async function PUT(request: Request) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as Partial<PortfolioProject>;
-  const row = normalize(body);
-  if (!validate(row)) {
-    return NextResponse.json({ error: "Title and slug are required." }, { status: 400 });
+  const db = getFirebaseDatabase();
+  const body = await request.json();
+  const { id, ...rest } = body;
+
+  if (!id) {
+    return NextResponse.json({ error: "Project ID is required." }, { status: 400 });
   }
 
-  const projects = await getProjects();
-  const index = projects.findIndex((item) => item.id === row.id);
-  if (index === -1) {
-    return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  }
+  const row = normalize(rest);
+  await update(ref(db, `portfolio/${id}`), row);
 
-  if (projects.some((item) => item.id !== row.id && item.slug === row.slug)) {
-    return NextResponse.json({ error: "Slug already exists." }, { status: 409 });
-  }
-
-  projects[index] = row;
-  await setProjects(projects);
-  return NextResponse.json({ success: true, project: row });
+  return NextResponse.json({ success: true, project: { id, ...row } });
 }
 
 export async function DELETE(request: Request) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getFirebaseDatabase();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
+
   if (!id) {
     return NextResponse.json({ error: "Missing id." }, { status: 400 });
   }
 
-  const projects = await getProjects();
-  const next = projects.filter((item) => item.id !== id);
-  if (next.length === projects.length) {
-    return NextResponse.json({ error: "Project not found." }, { status: 404 });
-  }
+  await remove(ref(db, `portfolio/${id}`));
 
-  await setProjects(next);
   return NextResponse.json({ success: true });
 }

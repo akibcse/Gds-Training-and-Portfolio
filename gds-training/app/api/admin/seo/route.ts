@@ -1,66 +1,68 @@
 import { NextResponse } from "next/server";
-import { getSeoGlobal, getSeoPages, setSeoGlobal, setSeoPages, type SeoGlobal, type SeoPageEntry } from "@/lib/admin-data";
-import { isAdminAuthenticated } from "@/lib/admin";
+import { revalidatePath } from "next/cache";
+import { get, ref, update } from "firebase/database";
+import { getFirebaseDatabase } from "@/lib/firebase";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 export const dynamic = 'force-dynamic';
 
+const DEFAULT_GLOBAL = {
+  siteUrl: "https://gds-training.vercel.app",
+  siteName: "GDS Training Bangladesh",
+  defaultTitle: "GDS Training in Bangladesh | Amadeus, Sabre & Travelport Certification",
+  titleTemplate: "%s | GDS Training Bangladesh",
+  defaultDescription: "Join practical GDS Training in Bangladesh. Learn Amadeus, Sabre, and Travelport for airline careers with certified instructors, labs, and placement support.",
+  defaultKeywords: ["GDS Training in Bangladesh"],
+  twitterHandle: "@roadyakib",
+  locale: "en_US",
+  twitterCard: "summary_large_image",
+  googleVerification: "",
+  bingVerification: ""
+};
 
-const normalizeGlobal = (input: Partial<SeoGlobal>): SeoGlobal => ({
-  siteUrl: (input?.siteUrl ?? "").trim() || "",
-  siteName: (input?.siteName ?? "").trim() || "",
-  defaultTitle: (input?.defaultTitle ?? "").trim() || "",
-  titleTemplate: (input?.titleTemplate ?? "").trim() || "%s",
-  defaultDescription: (input?.defaultDescription ?? "").trim() || "",
-  defaultKeywords: Array.isArray(input?.defaultKeywords) ? input.defaultKeywords.filter(Boolean) : [],
-  twitterHandle: (input?.twitterHandle ?? "").trim() || "",
-  locale: (input?.locale ?? "en_US").trim() || "en_US",
-  defaultOgImage: (input?.defaultOgImage ?? "").trim() || "",
-  twitterCard: input?.twitterCard === "summary" ? "summary" : "summary_large_image",
-  googleVerification: (input?.googleVerification ?? "").trim() || "",
-  bingVerification: (input?.bingVerification ?? "").trim() || ""
-});
-
-const normalizePages = (items: SeoPageEntry[]) =>
-  (Array.isArray(items) ? items : [])
-    .map((item) => ({
-      pageKey: item?.pageKey?.trim() || "",
-      metaTitle: item?.metaTitle?.trim() || "",
-      metaDescription: item?.metaDescription?.trim() || "",
-      keywords: Array.isArray(item?.keywords) ? item.keywords.filter(Boolean) : [],
-      canonicalUrl: item?.canonicalUrl?.trim() || "",
-      ogTitle: item?.ogTitle?.trim() || "",
-      ogDescription: item?.ogDescription?.trim() || "",
-      structuredDataOn: item?.structuredDataOn ?? true
-    }))
-    .filter((item) => item.pageKey);
-
-export async function GET() {
-  if (!(await isAdminAuthenticated())) {
+export async function GET(request: Request) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [global, pages] = await Promise.all([getSeoGlobal(), getSeoPages()]);
-  return NextResponse.json({ global, pages });
+  const db = getFirebaseDatabase();
+  const snapshot = await get(ref(db, "seo"));
+  const data = snapshot.val() || {};
+
+  return NextResponse.json({
+    global: { ...DEFAULT_GLOBAL, ...(data.global || {}) },
+    pages: data.pageLevelSeo ? Object.values(data.pageLevelSeo) : []
+  });
 }
 
 export async function PUT(request: Request) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as { global?: Partial<SeoGlobal>; pages?: SeoPageEntry[] };
+  const db = getFirebaseDatabase();
+  const body = (await request.json()) as { global?: any; pages?: any[] };
 
-  if (!body.global || !Array.isArray(body.pages)) {
+  if (!body.global) {
     return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
 
-  const global = normalizeGlobal(body.global);
-  if (!global.siteUrl || !global.defaultTitle || !global.defaultDescription) {
-    return NextResponse.json({ error: "Site URL, default title, and default description are required." }, { status: 400 });
+  // Structure internal pageLevelSeo object for efficient lookup if needed
+  const pageLevelSeo: Record<string, any> = {};
+  if (Array.isArray(body.pages)) {
+    body.pages.forEach(p => {
+      if (p.pageKey) pageLevelSeo[p.pageKey] = p;
+    });
   }
 
-  const pages = normalizePages(body.pages);
-  await Promise.all([setSeoGlobal(global), setSeoPages(pages)]);
+  const updates: Record<string, any> = {
+    "seo/global": body.global,
+    "seo/pageLevelSeo": pageLevelSeo
+  };
+
+  await update(ref(db), updates);
+
+  revalidatePath("/", "layout"); // Revalidate everything that uses layout
 
   return NextResponse.json({ success: true });
 }

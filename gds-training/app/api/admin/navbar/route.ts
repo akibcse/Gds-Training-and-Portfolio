@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { readJsonFile, writeJsonFile } from "@/lib/storage";
-import { isAdminAuthenticated } from "@/lib/admin";
+import { get, push, ref, set } from "firebase/database";
+import { getFirebaseDatabase } from "@/lib/firebase";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 export type NavbarItem = {
   id: string;
@@ -20,17 +21,49 @@ const DEFAULT_NAVBAR: NavbarItem[] = [
   { id: "6", label: "Contact", url: "/contact", order: 6, isActive: true }
 ];
 
+const mapNavbarObjectToArray = (input: unknown): NavbarItem[] => {
+  if (!input) {
+    return [];
+  }
+
+  if (Array.isArray(input)) {
+    return input as NavbarItem[];
+  }
+
+  const records = input as Record<string, Omit<NavbarItem, "id">>;
+  return Object.entries(records).map(([id, value]) => ({
+    id,
+    label: value?.label || "",
+    url: value?.url || "/",
+    order: Number(value?.order) || 0,
+    isActive: Boolean(value?.isActive)
+  }));
+};
+
 export async function GET() {
-  const items = await readJsonFile<NavbarItem[]>("navbar.json");
-  if (!items || items.length === 0) {
+  const db = getFirebaseDatabase();
+  if (!db) {
     return NextResponse.json(DEFAULT_NAVBAR);
   }
+
+  const snapshot = await get(ref(db, "navbar"));
+  const items = mapNavbarObjectToArray(snapshot.val());
+
+  if (!items.length) {
+    return NextResponse.json(DEFAULT_NAVBAR);
+  }
+
   return NextResponse.json(items.sort((a, b) => a.order - b.order));
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const db = getFirebaseDatabase();
+  if (!db) {
+    return NextResponse.json({ error: "Database unavailable." }, { status: 500 });
   }
 
   const body = (await request.json()) as Omit<NavbarItem, "id">;
@@ -39,16 +72,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Label and URL are required." }, { status: 400 });
   }
 
-  const items = await readJsonFile<NavbarItem[]>("navbar.json");
-  const newItem: NavbarItem = {
-    id: crypto.randomUUID(),
+  const snapshot = await get(ref(db, "navbar"));
+  const items = mapNavbarObjectToArray(snapshot.val());
+
+  const payload = {
     label: body.label,
     url: body.url,
     order: body.order ?? items.length + 1,
     isActive: body.isActive ?? true
   };
 
-  await writeJsonFile("navbar.json", [...items, newItem]);
+  const newItemRef = push(ref(db, "navbar"));
+  await set(newItemRef, payload);
   revalidatePath("/");
-  return NextResponse.json(newItem);
+  return NextResponse.json({ id: newItemRef.key, ...payload });
 }

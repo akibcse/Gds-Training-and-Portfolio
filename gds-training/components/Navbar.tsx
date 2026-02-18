@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProfile } from "@/lib/getData";
-import { readJsonFile } from "@/lib/storage";
+import { get, ref } from "firebase/database";
+import { getFirebaseDatabase } from "@/lib/firebase";
 
 type NavbarItem = {
   id: string;
@@ -19,13 +20,27 @@ const DEFAULT_NAVBAR: NavbarItem[] = [
   { id: "6", label: "Contact", url: "/contact", order: 6, isActive: true }
 ];
 
+const mapNavbarObjectToArray = (input: unknown): NavbarItem[] => {
+  if (!input) return [];
+  if (Array.isArray(input)) return input as NavbarItem[];
+  const records = input as Record<string, Omit<NavbarItem, "id">>;
+  return Object.entries(records).map(([id, value]) => ({
+    id,
+    label: value?.label || "",
+    url: value?.url || "/",
+    order: Number(value?.order) || 0,
+    isActive: Boolean(value?.isActive)
+  }));
+};
+
 const getNavbarItems = async (): Promise<NavbarItem[]> => {
   try {
-    const items = await readJsonFile<NavbarItem[]>("navbar.json");
-    if (!items || items.length === 0) {
-      return DEFAULT_NAVBAR;
-    }
-    return items.filter(item => item.isActive).sort((a, b) => a.order - b.order);
+    const db = getFirebaseDatabase();
+    if (!db) return DEFAULT_NAVBAR;
+    const snapshot = await get(ref(db, "navbar"));
+    const items = mapNavbarObjectToArray(snapshot.val());
+    if (!items || items.length === 0) return DEFAULT_NAVBAR;
+    return items.filter((item) => item.isActive).sort((a, b) => a.order - b.order);
   } catch {
     return DEFAULT_NAVBAR;
   }

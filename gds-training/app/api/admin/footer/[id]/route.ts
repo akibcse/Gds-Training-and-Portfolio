@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { readJsonFile, writeJsonFile } from "@/lib/storage";
-import { isAdminAuthenticated } from "@/lib/admin";
+import { get, ref, remove, update } from "firebase/database";
+import { getFirebaseDatabase } from "@/lib/firebase";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const db = getFirebaseDatabase();
+  if (!db) {
+    return NextResponse.json({ error: "Database unavailable." }, { status: 500 });
   }
 
   const { id } = await params;
@@ -17,9 +23,13 @@ export async function DELETE(
     return NextResponse.json({ error: "ID is required." }, { status: 400 });
   }
 
-  const sections = await readJsonFile<Array<{id: string, title: string, content: string, order: number, isActive: boolean}>>("footer.json");
-  const filtered = sections.filter((section) => section.id !== id);
-  await writeJsonFile("footer.json", filtered);
+  const sectionRef = ref(db, `footer/${id}`);
+  const snapshot = await get(sectionRef);
+  if (!snapshot.exists()) {
+    return NextResponse.json({ error: "Section not found" }, { status: 404 });
+  }
+
+  await remove(sectionRef);
   revalidatePath("/");
   return NextResponse.json({ success: true });
 }
@@ -28,26 +38,39 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getFirebaseDatabase();
+  if (!db) {
+    return NextResponse.json({ error: "Database unavailable." }, { status: 500 });
+  }
+
   const { id } = await params;
-  const body = await req.json();
+  const body = (await req.json()) as Partial<{
+    title: string;
+    content: string;
+    order: number;
+    isActive: boolean;
+  }>;
 
   if (!id) {
     return NextResponse.json({ error: "ID is required." }, { status: 400 });
   }
 
-  const sections = await readJsonFile<Array<{id: string, title: string, content: string, order: number, isActive: boolean}>>("footer.json");
-  const index = sections.findIndex((section) => section.id === id);
-
-  if (index === -1) {
+  const sectionRef = ref(db, `footer/${id}`);
+  const snapshot = await get(sectionRef);
+  if (!snapshot.exists()) {
     return NextResponse.json({ error: "Section not found" }, { status: 404 });
   }
 
-  sections[index] = { ...sections[index], ...body };
-  await writeJsonFile("footer.json", sections);
+  const nextValue = {
+    ...snapshot.val(),
+    ...body
+  };
+
+  await update(sectionRef, nextValue);
   revalidatePath("/");
-  return NextResponse.json(sections[index]);
+  return NextResponse.json({ id, ...nextValue });
 }

@@ -140,17 +140,59 @@ export const getProfile = async () => (await loadJsonObject<Profile>("profile.js
 export const getCourses = () => loadJson<Course[]>("courses.json");
 export const getBlogs = () => loadJson<Blog[]>("blogs.json");
 export const getTestimonials = () => loadJson<Testimonial[]>("testimonials.json");
-export const getSeo = async () => (await loadJsonObject<Seo>("seo.json"))!;
 export const getPortfolio = async () => (await loadJsonObject<Portfolio>("portfolio.json"))!;
-export const getPortfolioProjects = () => loadJson<PortfolioProject[]>("projects.json");
 export const getSeoPages = () => loadJson<SeoPageEntry[]>("seo-pages.json");
 
+import { get, ref } from "firebase/database";
+import { db } from "./firebase";
+
+export const getSeo = async () => {
+  try {
+    const snapshot = await get(ref(db, "seo"));
+    const data = snapshot.val();
+    return data?.global || {};
+  } catch (error) {
+    console.error("Failed to fetch SEO:", error);
+    return {};
+  }
+};
+
+export const getPortfolioProjects = async () => {
+  try {
+    const snapshot = await get(ref(db, "portfolio"));
+    const data = snapshot.val();
+    if (!data) return [];
+    return Object.entries(data).map(([id, value]: [string, any]) => ({
+      id,
+      ...value
+    }));
+  } catch (error) {
+    console.error("Failed to fetch Portfolio Projects:", error);
+    return [];
+  }
+};
+
 export const getCourseBySlug = async (slug: string) => {
-  const courses = await getCourses();
-  return courses.find((course) => course.slug === slug) ?? null;
+  try {
+    const snapshot = await get(ref(db, "courses"));
+    const data = snapshot.val();
+    if (!data) return null;
+
+    let courses: any[] = [];
+    if (Array.isArray(data)) {
+      courses = data.map((item, index) => ({ id: String(index), ...item }));
+    } else {
+      courses = Object.entries(data).map(([id, value]: [string, any]) => ({ id, ...value }));
+    }
+
+    return courses.find((course) => course.slug === slug) ?? null;
+  } catch (error) {
+    console.error("Failed to fetch Course by slug:", error);
+    return null;
+  }
 };
 
 export const getBlogBySlug = async (slug: string) => {
   const blogs = await getBlogs();
-  return blogs.find((blog) => blog.slug === slug) ?? null;
+  return blogs.find((blog: any) => blog.slug === slug) ?? null;
 };

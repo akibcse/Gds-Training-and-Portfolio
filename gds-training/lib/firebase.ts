@@ -1,7 +1,6 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getDatabase, Database } from 'firebase/database';
-
-let dbInstance: Database | null = null;
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyBRBK0TnBJ7ga3H7-DOYUHmQqZXbLJ5LiY",
@@ -13,23 +12,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:891661614430:web:48637a0a8ac59870e4e3cf"
 };
 
-export const getFirebaseDatabase = (): Database | null => {
-  if (!dbInstance) {
-    try {
-      const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-      dbInstance = getDatabase(app);
-    } catch (error) {
-      console.error('Firebase initialization error:', error);
-      return null;
-    }
-  }
-  return dbInstance;
-};
+// Initialize Firebase
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-export const database = {
-  get ref() {
-    return getFirebaseDatabase();
-  }
-};
+export { app, db, auth };
 
-export default () => getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Helpers for backward compatibility if needed, but preferred to use direct exports
+export const getFirebaseApp = () => app;
+export const getFirebaseDatabase = () => db;
+export const getFirebaseAuth = () => auth;
+
+export default app;

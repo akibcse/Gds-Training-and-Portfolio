@@ -4,7 +4,9 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
-import { getSeo } from "@/lib/getData";
+import { get, ref } from "firebase/database";
+import { db } from "@/lib/firebase";
+
 
 const sans = DM_Sans({
   subsets: ["latin"],
@@ -23,7 +25,15 @@ const serif = Merriweather({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeo();
+  let seo: any = {};
+  try {
+    const snapshot = await get(ref(db, "seo"));
+    const data = snapshot.val();
+    seo = data?.global || {};
+  } catch (error) {
+    console.error("Failed to fetch SEO metadata:", error);
+  }
+
   const siteUrl = seo?.siteUrl || 'https://gds-training.vercel.app';
 
   return {
@@ -35,7 +45,10 @@ export async function generateMetadata(): Promise<Metadata> {
     description: seo?.defaultDescription || 'GDS Training in Dhaka',
     keywords: seo?.defaultKeywords || [],
     verification: {
-      google: "8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0",
+      google: seo?.googleVerification || "8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0",
+      other: {
+        bing: seo?.bingVerification || ""
+      }
     },
     robots: {
       index: true,
@@ -57,19 +70,19 @@ export async function generateMetadata(): Promise<Metadata> {
       description: seo.defaultDescription,
       url: seo.siteUrl,
       siteName: seo.siteName,
-      locale: seo.locale,
+      locale: seo.locale || "en_US",
       type: "website",
       images: [
         {
-          url: `${siteUrl}/api/og?title=${encodeURIComponent(seo.siteName)}`,
+          url: seo.defaultOgImage || `${siteUrl}/api/og?title=${encodeURIComponent(seo.siteName || 'GDS Training')}`,
           width: 1200,
           height: 630,
-          alt: seo.siteName,
+          alt: seo.siteName || 'GDS Training',
         }
       ]
     },
     twitter: {
-      card: seo.twitterCard ?? "summary_large_image",
+      card: seo.twitterCard || "summary_large_image",
       title: seo.defaultTitle,
       description: seo.defaultDescription,
       creator: seo.twitterHandle
