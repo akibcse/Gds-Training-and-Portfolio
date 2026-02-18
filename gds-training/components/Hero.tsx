@@ -24,6 +24,7 @@ export default function Hero({
 }: Props) {
   const reduce = useReducedMotion();
   const isRemoteImage = /^https?:\/\//.test(profileImage);
+  const seoHeadline = "GDS Training in Bangladesh | Amadeus, Sabre & Travelport Certification";
 
   return (
     <section className="relative overflow-hidden">
@@ -51,7 +52,7 @@ export default function Hero({
           </p>
           <h1 className="mt-4 font-[var(--font-serif)] text-4xl leading-tight md:text-5xl">
             <span className="bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
-              {headline}
+              {seoHeadline}
             </span>
           </h1>
           <p className="mt-4 max-w-xl text-sm text-white/90 md:text-base">{description}</p>
@@ -88,7 +89,7 @@ export default function Hero({
           >
             <Image
               src={profileImage || "/placeholder-avatar.png"}
-              alt={instructorName}
+              alt={`Certified GDS training instructor ${instructorName} for air ticketing and airline reservation in Bangladesh`}
               width={400}
               height={400}
               className="h-full w-full object-cover transition-transform duration-700 hover:scale-110"

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { readJsonFile, writeJsonFile } from "@/lib/storage";
 import { isAdminAuthenticated } from "@/lib/admin";
 
@@ -45,5 +46,6 @@ export async function POST(request: Request) {
   };
 
   await writeJsonFile("footer.json", [...sections, newSection]);
+  revalidatePath("/");
   return NextResponse.json(newSection);
 }
