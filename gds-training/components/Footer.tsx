@@ -67,12 +67,14 @@ export default async function Footer() {
                 {section.content || "Certified GDS Instructor portfolio for Air Ticketing Course in Bangladesh, practical GDS Training in Dhaka, Sabre, Galileo, and airline reservation mentoring."}
               </p>
             ) : section.title === "Quick Links" ? (
-              <div className="mt-2 space-y-2 text-sm text-ink/80">
+              <ul className="mt-2 space-y-2 text-sm text-ink/80">
+                <li><Link href="/">Home</Link></li>
+                <li><Link href="/courses">All Courses</Link></li>
                 <li><Link href="/about">About</Link></li>
                 <li><Link href="/contact">Contact</Link></li>
-                <li><Link href="/courses">Courses</Link></li>
-                <li><Link href="/admin/login">Admin Login</Link></li>
-              </div>
+                <li><a href="https://facebook.com/roadyakib" target="_blank" rel="noreferrer">Facebook</a></li>
+                <li><a href="https://linkedin.com/in/akibcse" target="_blank" rel="noreferrer">LinkedIn</a></li>
+              </ul>
             ) : section.title === "Lead Desk" ? (
               <>
                 <p className="mt-2 text-sm text-ink/80">

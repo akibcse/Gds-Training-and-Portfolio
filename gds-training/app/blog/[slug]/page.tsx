@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import SEO from "@/components/SEO";
-import { getBlogBySlug, getBlogs, getSeo } from "@/lib/getData";
+import { getBlogBySlug, getBlogs, getCourses, getSeo } from "@/lib/getData";
 import { getSeoOverride } from "@/lib/seo-settings";
 import { blogSchema, breadcrumbSchema } from "@/lib/structuredData";
 
@@ -36,13 +36,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPage({ params }: Props) {
   const { slug } = await params;
-  const [blog, blogs, seo] = await Promise.all([getBlogBySlug(slug), getBlogs(), getSeo()]);
+  const [blog, blogs, courses, seo] = await Promise.all([getBlogBySlug(slug), getBlogs(), getCourses(), getSeo()]);
 
   if (!blog) {
     notFound();
   }
 
   const relatedBlogs = blogs.filter((item) => blog.relatedSlugs.includes(item.slug));
+  const relatedCourses = courses.filter((course) => {
+    if (blog.relatedCourseSlugs?.includes(course.slug)) {
+      return true;
+    }
+
+    const source = `${blog.title} ${blog.description} ${blog.keywords.join(" ")}`.toLowerCase();
+    return (
+      source.includes("sabre") && course.title.toLowerCase().includes("sabre")
+    ) || (
+      source.includes("amadeus") && course.title.toLowerCase().includes("amadeus")
+    ) || (
+      source.includes("travelport") && course.title.toLowerCase().includes("travelport")
+    ) || (
+      source.includes("air ticketing") && course.title.toLowerCase().includes("air ticketing")
+    );
+  });
 
   return (
     <article className="mx-auto max-w-4xl px-4 py-14 md:px-6">
@@ -66,6 +82,23 @@ export default async function BlogPage({ params }: Props) {
           <p key={paragraph}>{paragraph}</p>
         ))}
       </div>
+
+      <section className="mt-10 rounded-2xl border border-aviation-100 bg-white p-6">
+        <h2 className="text-2xl font-semibold text-ink">Related Courses</h2>
+        <div className="mt-3 space-y-2">
+          {relatedCourses.length > 0 ? (
+            relatedCourses.map((course) => (
+              <Link key={course.slug} href={`/courses/${course.slug}`} className="block text-sm text-aviation-700 underline">
+                {course.title}
+              </Link>
+            ))
+          ) : (
+            <Link href="/courses" className="block text-sm text-aviation-700 underline">
+              Browse all airline ticketing and GDS courses
+            </Link>
+          )}
+        </div>
+      </section>
 
       <section className="mt-10 rounded-2xl border border-aviation-100 bg-white p-6">
         <h2 className="text-2xl font-semibold text-ink">Related Articles</h2>

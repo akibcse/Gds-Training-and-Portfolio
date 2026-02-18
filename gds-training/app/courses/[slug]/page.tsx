@@ -65,6 +65,16 @@ export default async function CoursePage({ params }: Props) {
         ])}
       />
 
+      <div className="mb-5 flex flex-wrap gap-3 text-sm text-aviation-700">
+        <Link href="/" className="underline">
+          Home
+        </Link>
+        <span aria-hidden="true">/</span>
+        <Link href="/courses" className="underline">
+          All Courses
+        </Link>
+      </div>
+
       <h1 className="font-[var(--font-serif)] text-4xl text-ink">{course.title}</h1>
       <p className="mt-4 max-w-4xl text-sm text-ink/85">{course.description}</p>
 

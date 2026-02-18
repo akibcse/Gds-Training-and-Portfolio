@@ -48,6 +48,7 @@ export type Blog = {
   keywords: string[];
   content: string[];
   relatedSlugs: string[];
+  relatedCourseSlugs?: string[];
 };
 
 export type Testimonial = {

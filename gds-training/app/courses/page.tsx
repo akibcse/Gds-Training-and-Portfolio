@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import CourseCard from "@/components/CourseCard";
+import SEO from "@/components/SEO";
 import { getCourses, getSeo } from "@/lib/getData";
 import { getSeoOverride } from "@/lib/seo-settings";
+import { breadcrumbSchema } from "@/lib/structuredData";
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [seo, override] = await Promise.all([getSeo(), getSeoOverride("courses")]);
-  const title = "Air Ticketing and GDS Courses";
+  const title = "Airline Ticketing Course in Bangladesh | GDS Training";
   const description =
-    "Explore job-focused Air Ticketing Course, Amadeus Training, Travelport Training, and Sabre Training modules in Dhaka.";
+    "Professional Air Ticketing Course and GDS Training in Bangladesh. Master Amadeus, Sabre, and Travelport with job-ready reservation skills and certification.";
 
   return {
     title: override?.metaTitle || title,
@@ -25,10 +27,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function CoursesPage() {
-  const courses = await getCourses();
+  const [courses, seo] = await Promise.all([getCourses(), getSeo()]);
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-14 md:px-6">
+      <SEO
+        id="courses-breadcrumb-schema"
+        data={breadcrumbSchema([
+          { name: "Home", url: seo.siteUrl },
+          { name: "Courses", url: `${seo.siteUrl}/courses` }
+        ])}
+      />
       <h1 className="font-[var(--font-serif)] text-4xl text-ink">Air Ticketing and GDS Training Courses</h1>
       <p className="mt-3 text-sm text-ink/80">
         Choose from foundation to advanced modules for airline reservation careers.

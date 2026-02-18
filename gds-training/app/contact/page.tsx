@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import LeadForm from "@/components/LeadForm";
+import SEO from "@/components/SEO";
 import { getProfile, getSeo } from "@/lib/getData";
+import { breadcrumbSchema } from "@/lib/structuredData";
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeo();
-  const title = "Contact Md. Akib Hasan for GDS Training";
+  const title = "Contact for GDS Training in Dhaka, Bangladesh";
   const description =
-    "Contact Md. Akib Hasan to enroll in Air Ticketing Course and practical GDS Training in Dhaka for Sabre and Galileo based reservation careers.";
+    "Enroll in top GDS Training in Bangladesh. Contact us for Amadeus, Sabre, and Travelport courses, batch schedules, fees, and admissions for air ticketing careers.";
 
   return {
     title,
@@ -25,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const profile = await getProfile();
+  const [profile, seo] = await Promise.all([getProfile(), getSeo()]);
   
   const profileData = profile || {
     phone: "",
@@ -42,6 +44,13 @@ export default async function ContactPage() {
 
   return (
     <section className="mx-auto grid max-w-6xl gap-6 px-4 py-14 md:grid-cols-2 md:px-6">
+      <SEO
+        id="contact-breadcrumb-schema"
+        data={breadcrumbSchema([
+          { name: "Home", url: seo.siteUrl },
+          { name: "Contact", url: `${seo.siteUrl}/contact` }
+        ])}
+      />
       <div>
         <h1 className="font-[var(--font-serif)] text-4xl text-ink">Contact Admissions</h1>
         <p className="mt-3 text-sm text-ink/80">

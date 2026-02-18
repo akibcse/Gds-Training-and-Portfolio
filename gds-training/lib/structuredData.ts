@@ -86,9 +86,19 @@ export const localBusinessSchema = (profile: ProfileForSchema, siteUrl: string) 
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: "23.8103", // Dhaka coordinates
+    latitude: "23.8103",
     longitude: "90.4125"
   },
+  hasMap: "https://maps.google.com/?q=23.8103,90.4125",
+  areaServed: {
+    "@type": "Country",
+    name: "Bangladesh"
+  },
+  sameAs: [
+    "https://facebook.com/roadyakib",
+    "https://linkedin.com/in/akibcse",
+    "https://wa.me/8801521438546"
+  ],
   openingHoursSpecification: [
     {
       "@type": "OpeningHoursSpecification",
@@ -114,10 +124,16 @@ export const courseSchema = (course: Course, siteUrl: string) => ({
   keywords: course?.keywords?.join(", ") || "",
   educationalCredentialAwarded: course?.certification || "Professional Certificate",
   timeRequired: course?.duration || "",
+  courseMode: course?.mode || "",
   url: `${siteUrl}/courses/${course?.slug || ""}`,
   offers: {
     "@type": "Offer",
-    category: "Professional Training"
+    category: "Professional Training",
+    availability: "https://schema.org/InStock",
+    priceCurrency: "BDT",
+    price: "Contact for latest fee",
+    url: `${siteUrl}/contact`,
+    description: `${course?.duration || "Flexible"} instructor-led training with practical lab support.`
   }
 });
 

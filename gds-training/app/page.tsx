@@ -28,6 +28,21 @@ const homeFaqs = [
     question: "Can I get support for job placement after training?",
     answer:
       "Yes, we provide interview preparation, CV support, and referral guidance for travel agencies and OTA roles."
+  },
+  {
+    question: "Is this air ticketing course suitable for beginners in Bangladesh?",
+    answer:
+      "Yes. The course starts from booking fundamentals and gradually moves into fare pricing, ticket issue, reissue, and refund workflows."
+  },
+  {
+    question: "Which software will I practice in your GDS Training in Bangladesh?",
+    answer:
+      "You will train on Amadeus, Sabre, and Travelport systems through practical reservation cases used in real agency operations."
+  },
+  {
+    question: "Will I receive certification after completing the training?",
+    answer:
+      "Yes, learners receive course completion certification and interview guidance for entry-level air ticketing and reservation roles."
   }
 ];
 
@@ -63,7 +78,7 @@ export default async function HomePage() {
       <Reveal className="mx-auto max-w-6xl px-4 py-10 md:px-6" delay={0.05}>
         <div className="grid items-start gap-6 md:grid-cols-[1.2fr_1fr]">
           <div>
-            <h2 className="text-3xl font-semibold text-ink">Why Learn GDS Training for Airline Careers?</h2>
+            <h2 className="text-3xl font-semibold text-ink">Master Airline Reservation with Job-Focused GDS Training</h2>
             <p className="mt-2 text-sm text-ink/80">
               Gain booking, fare, ticketing, reissue, and refund skills that employers in Dhaka actively hire for.
             </p>
@@ -84,7 +99,7 @@ export default async function HomePage() {
       </Reveal>
 
       <Reveal className="mx-auto max-w-6xl px-4 py-10 md:px-6" delay={0.07}>
-        <h2 className="text-3xl font-semibold text-ink">Software Covered</h2>
+        <h2 className="text-3xl font-semibold text-ink">Practical Training on Amadeus, Sabre &amp; Travelport Systems</h2>
         <p className="mt-2 text-sm text-ink/80">
           Learn the world&apos;s leading systems: <strong>Amadeus Training</strong>, <strong>Travelport Training</strong>, and <strong>Sabre Training</strong> through real booking scenarios.
         </p>
@@ -96,7 +111,7 @@ export default async function HomePage() {
       </Reveal>
 
       <Reveal className="mx-auto max-w-6xl px-4 py-10 md:px-6" delay={0.09}>
-        <h2 className="text-3xl font-semibold text-ink">Career Opportunities After Airline Reservation Course</h2>
+        <h2 className="text-3xl font-semibold text-ink">Career Opportunities After Air Ticketing Course in Bangladesh</h2>
         <ul className="mt-4 grid list-disc gap-3 pl-6 text-sm text-ink/85 md:grid-cols-2">
           <li>Air Ticketing Executive in IATA and non-IATA agencies</li>
           <li>GDS Reservation Agent for domestic and international routes</li>
@@ -115,7 +130,7 @@ export default async function HomePage() {
       </Reveal>
 
       <Reveal className="mx-auto max-w-6xl px-4 py-10 md:px-6" delay={0.13}>
-        <h2 className="text-3xl font-semibold text-ink">FAQ: Air Ticketing and GDS Training in Dhaka</h2>
+        <h2 className="text-3xl font-semibold text-ink">FAQ: Air Ticketing &amp; GDS Training in Dhaka</h2>
         <div className="mt-6 space-y-4">
           {homeFaqs.map((faq) => (
             <article key={faq.question} className="rounded-2xl border border-aviation-100 bg-white p-5 shadow-soft">

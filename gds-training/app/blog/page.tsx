@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import SEO from "@/components/SEO";
 import { getBlogs, getSeo } from "@/lib/getData";
 import { getSeoOverride } from "@/lib/seo-settings";
+import { breadcrumbSchema } from "@/lib/structuredData";
 
 export const dynamic = 'force-dynamic';
 
@@ -25,10 +27,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function BlogIndexPage() {
-  const blogs = await getBlogs();
+  const [blogs, seo] = await Promise.all([getBlogs(), getSeo()]);
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-14 md:px-6">
+      <SEO
+        id="blog-breadcrumb-schema"
+        data={breadcrumbSchema([
+          { name: "Home", url: seo.siteUrl },
+          { name: "Blog", url: `${seo.siteUrl}/blog` }
+        ])}
+      />
       <h1 className="font-[var(--font-serif)] text-4xl text-ink">GDS Training Blog</h1>
       <p className="mt-3 text-sm text-ink/80">
         Keyword-focused guides for students searching Air Ticketing Course and GDS career success in Bangladesh.
