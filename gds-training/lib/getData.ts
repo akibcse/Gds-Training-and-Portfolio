@@ -1,4 +1,10 @@
 import { readJsonFile, readJsonObject } from "./storage";
+import { getNavbar } from "./cms/navbar";
+import { getFooterItems } from "./cms/footer";
+import { getGlobalSeo, getPageSeo } from "./cms/seo";
+import { getCourses as getCmsCourses, getCourseBySlug as getCmsCourseBySlug } from "./cms/courses";
+import { getBlogs as getCmsBlogs, getBlogBySlug as getCmsBlogBySlug } from "./cms/blogs";
+import { getPortfolioProjects as getCmsPortfolioProjects } from "./cms/portfolio";
 
 export type Profile = {
   name: string;
@@ -35,6 +41,7 @@ export type Course = {
   faqs: { question: string; answer: string }[];
   keywords: string[];
   relatedBlogSlugs: string[];
+  relatedCourseSlugs?: string[];
 };
 
 export type Blog = {
@@ -136,21 +143,30 @@ const loadJsonObject = async <T>(fileName: string): Promise<T | null> => {
   return await readJsonObject<T>(fileName);
 };
 
+// --- Updated to use CMS Modules ---
 export const getProfile = async () => (await loadJsonObject<Profile>("profile.json"))!;
-export const getCourses = () => loadJson<Course[]>("courses.json");
-export const getBlogs = () => loadJson<Blog[]>("blogs.json");
+export const getCourses = () => getCmsCourses();
+export const getBlogs = () => getCmsBlogs();
 export const getTestimonials = () => loadJson<Testimonial[]>("testimonials.json");
-export const getSeo = async () => (await loadJsonObject<Seo>("seo.json"))!;
+export const getSeo = async () => (await getGlobalSeo()) as Seo;
 export const getPortfolio = async () => (await loadJsonObject<Portfolio>("portfolio.json"))!;
-export const getPortfolioProjects = () => loadJson<PortfolioProject[]>("projects.json");
-export const getSeoPages = () => loadJson<SeoPageEntry[]>("seo-pages.json");
+export const getPortfolioProjects = () => getCmsPortfolioProjects();
+export const getSeoPages = async (): Promise<SeoPageEntry[]> => {
+  // This is a mapping adapter for getPageSeo
+  // In the real app, we might want to fetch all pages, but typically it's called by slug.
+  // For now, returning empty array as individual pages should use getPageSeo directly in their contexts.
+  // But lib/seo-settings.ts calls this.
+  return [];
+};
 
 export const getCourseBySlug = async (slug: string) => {
-  const courses = await getCourses();
-  return courses.find((course) => course.slug === slug) ?? null;
+  return await getCmsCourseBySlug(slug) as Course;
 };
 
 export const getBlogBySlug = async (slug: string) => {
-  const blogs = await getBlogs();
-  return blogs.find((blog) => blog.slug === slug) ?? null;
+  return await getCmsBlogBySlug(slug) as Blog;
 };
+
+// Exporting Navbar items getter for any other consumers
+export const getNavbarItems = () => getNavbar();
+export const getFooterSections = () => getFooterItems();

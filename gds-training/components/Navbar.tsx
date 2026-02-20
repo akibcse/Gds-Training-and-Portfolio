@@ -1,16 +1,8 @@
 import Link from "next/link";
 import { getProfile } from "@/lib/getData";
-import { readJsonFile } from "@/lib/storage";
+import { getNavbar } from "@/lib/cms/navbar";
 
-type NavbarItem = {
-  id: string;
-  label: string;
-  url: string;
-  order: number;
-  isActive: boolean;
-};
-
-const DEFAULT_NAVBAR: NavbarItem[] = [
+const DEFAULT_NAVBAR = [
   { id: "1", label: "Home", url: "/", order: 1, isActive: true },
   { id: "2", label: "Courses", url: "/courses", order: 2, isActive: true },
   { id: "3", label: "Blog", url: "/blog", order: 3, isActive: true },
@@ -19,21 +11,15 @@ const DEFAULT_NAVBAR: NavbarItem[] = [
   { id: "6", label: "Contact", url: "/contact", order: 6, isActive: true }
 ];
 
-const getNavbarItems = async (): Promise<NavbarItem[]> => {
-  try {
-    const items = await readJsonFile<NavbarItem[]>("navbar.json");
-    if (!items || items.length === 0) {
-      return DEFAULT_NAVBAR;
-    }
-    return items.filter(item => item.isActive).sort((a, b) => a.order - b.order);
-  } catch {
-    return DEFAULT_NAVBAR;
-  }
-};
-
 export default async function Navbar() {
   const profile = await getProfile();
-  const navItems = await getNavbarItems();
+  let navItems = await getNavbar();
+
+  if (!navItems || navItems.length === 0) {
+    navItems = DEFAULT_NAVBAR as any;
+  } else {
+    navItems = navItems.filter(item => item.isActive);
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-aviation-100/70 bg-white/85 backdrop-blur">

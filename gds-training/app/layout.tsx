@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
-import { getSeo } from "@/lib/getData";
+import { getGlobalSeo } from "@/lib/cms/seo";
 
 const sans = DM_Sans({
   subsets: ["latin"],
@@ -23,56 +23,59 @@ const serif = Merriweather({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeo();
-  const siteUrl = seo?.siteUrl || 'https://gds-training.vercel.app';
+  const seo = await getGlobalSeo();
+  const fallbackSiteUrl = "https://airtech-aviation-ota.vercel.app";
+
+  let siteUrl = seo?.siteUrl || fallbackSiteUrl;
+  try {
+    siteUrl = new URL(siteUrl).toString().replace(/\/$/, "");
+  } catch {
+    siteUrl = fallbackSiteUrl;
+  }
+
+  const siteName = seo?.siteName || "Air Tech Aviation";
+  const defaultTitle = seo?.defaultTitle || "GDS Training & Air Ticketing";
+  const defaultDescription = seo?.defaultDescription || "Professional GDS Training and Air Ticketing courses in Bangladesh.";
 
   return {
     metadataBase: new URL(siteUrl),
     title: {
-      default: seo?.defaultTitle || 'GDS Training',
-      template: seo?.titleTemplate || '%s'
+      default: defaultTitle,
+      template: seo?.titleTemplate || `%s | ${siteName}`
     },
-    description: seo?.defaultDescription || 'GDS Training in Dhaka',
-    keywords: seo?.defaultKeywords || [],
+    description: defaultDescription,
+    keywords: seo?.defaultKeywords || ["GDS", "Training", "Aviation"],
     verification: {
-      google: "8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0",
+      google: seo?.googleVerification || "8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0",
     },
     robots: {
       index: true,
       follow: true,
-      nocache: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
     },
     alternates: {
       canonical: siteUrl
     },
     openGraph: {
-      title: seo.defaultTitle,
-      description: seo.defaultDescription,
-      url: seo.siteUrl,
-      siteName: seo.siteName,
-      locale: seo.locale,
+      title: defaultTitle,
+      description: defaultDescription,
+      url: siteUrl,
+      siteName,
+      locale: "en_US",
       type: "website",
       images: [
         {
-          url: `${siteUrl}/api/og?title=${encodeURIComponent(seo.siteName)}`,
+          url: seo?.defaultOgImage || `${siteUrl}/api/og?title=${encodeURIComponent(siteName)}`,
           width: 1200,
           height: 630,
-          alt: seo.siteName,
+          alt: siteName,
         }
       ]
     },
     twitter: {
-      card: seo.twitterCard ?? "summary_large_image",
-      title: seo.defaultTitle,
-      description: seo.defaultDescription,
-      creator: seo.twitterHandle
+      card: "summary_large_image",
+      title: defaultTitle,
+      description: defaultDescription,
+      creator: seo?.twitterHandle
     }
   };
 }

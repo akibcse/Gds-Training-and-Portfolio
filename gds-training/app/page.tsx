@@ -55,6 +55,11 @@ export default async function HomePage() {
     getSeo()
   ]);
 
+  const portfolioData = portfolio || {
+    fullName: profile.name,
+    profileImage: "/images/md-akib-hasan.svg"
+  };
+
   return (
     <>
       <SEO id="org-schema" data={organizationSchema(profile, seo.siteUrl)} />
@@ -70,8 +75,8 @@ export default async function HomePage() {
           studentsTrained={profile.studentsTrained}
           experienceYears={profile.experienceYears}
           whatsapp={profile.whatsapp}
-          profileImage={portfolio.profileImage}
-          instructorName={portfolio.fullName}
+          profileImage={portfolioData.profileImage}
+          instructorName={portfolioData.fullName}
         />
       </div>
 

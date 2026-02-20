@@ -47,15 +47,18 @@ export const changeAdminEmail = async (newEmail: string) => {
 };
 
 export const verifyAdminCredentials = async (email: string, password: string) => {
-  if (await isAdminCredentials(email, password)) {
-    return true;
-  }
-
   try {
     const config = await getAdminConfig();
-    const emailMatch = config.email?.trim().toLowerCase() === email.trim().toLowerCase();
-    const passwordMatch = config.passwordHash === hashValue(password);
-    return emailMatch && passwordMatch;
+
+    // If config exists, check against it
+    if (config && config.passwordHash) {
+      const emailMatch = config.email?.trim().toLowerCase() === email.trim().toLowerCase();
+      const passwordMatch = config.passwordHash === hashValue(password);
+      if (emailMatch && passwordMatch) return true;
+    }
+
+    // Explicitly check default credentials IF no custom config is found OR as a last resort
+    return await isAdminCredentials(email, password);
   } catch {
     return await isAdminCredentials(email, password);
   }

@@ -1,73 +1,38 @@
 import { NextResponse } from "next/server";
-import { readJsonFile, writeJsonFile } from "@/lib/storage";
 import { isAdminAuthenticated } from "@/lib/admin";
-
-console.log("Footer [id] route module loaded");
-
-export async function DELETE(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  console.log("DELETE /api/admin/footer/[id] called");
-  console.log("Params:", params);
-  
-  const isAuth = await isAdminAuthenticated();
-  console.log("Is authenticated:", isAuth);
-  
-  if (!isAuth) {
-    console.log("Unauthorized DELETE");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = await params;
-  console.log("Delete ID:", id);
-
-  if (!id) {
-    return NextResponse.json({ error: "ID is required." }, { status: 400 });
-  }
-
-  const sections = await readJsonFile<Array<{id: string, title: string, content: string, order: number, isActive: boolean}>>("footer.json");
-  console.log("Current sections:", sections.length);
-  
-  const filtered = sections.filter((section) => section.id !== id);
-  await writeJsonFile("footer.json", filtered);
-  return NextResponse.json({ success: true });
-}
+import { updateFooterSection, deleteFooterSection } from "@/lib/cms/footer";
 
 export async function PUT(
-  req: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log("PUT /api/admin/footer/[id] called");
-  
-  const isAuth = await isAdminAuthenticated();
-  console.log("Is authenticated:", isAuth);
-  
-  if (!isAuth) {
-    console.log("Unauthorized PUT");
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params;
-  const body = await req.json();
-  console.log("Update ID:", id, "Body:", body);
+  try {
+    const { id } = await params;
+    const body = await request.json();
+    await updateFooterSection(id, body);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
 
-  if (!id) {
-    return NextResponse.json({ error: "ID is required." }, { status: 400 });
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const sections = await readJsonFile<Array<{id: string, title: string, content: string, order: number, isActive: boolean}>>("footer.json");
-  console.log("Current sections:", sections.length);
-  
-  const index = sections.findIndex((section) => section.id === id);
-
-  if (index === -1) {
-    console.log("Section not found for ID:", id);
-    console.log("Available IDs:", sections.map(s => s.id));
-    return NextResponse.json({ error: "Section not found" }, { status: 404 });
+  try {
+    const { id } = await params;
+    await deleteFooterSection(id);
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-
-  sections[index] = { ...sections[index], ...body };
-  await writeJsonFile("footer.json", sections);
-  return NextResponse.json(sections[index]);
 }

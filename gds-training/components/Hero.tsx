@@ -9,7 +9,7 @@ type Props = {
   studentsTrained: number;
   experienceYears: number;
   whatsapp: string;
-  profileImage: string;
+  profileImage?: string;
   instructorName: string;
 };
 
@@ -23,7 +23,8 @@ export default function Hero({
   instructorName
 }: Props) {
   const reduce = useReducedMotion();
-  const isRemoteImage = /^https?:\/\//.test(profileImage);
+  const resolvedProfileImage = profileImage?.trim() || "/images/md-akib-hasan.svg";
+  const isRemoteImage = /^https?:\/\//.test(resolvedProfileImage);
 
   return (
     <section className="relative overflow-hidden">
@@ -87,7 +88,7 @@ export default function Hero({
             className="glass-card relative h-72 w-72 overflow-hidden rounded-3xl"
           >
             <Image
-              src={profileImage || "/placeholder-avatar.png"}
+              src={resolvedProfileImage}
               alt={instructorName}
               width={400}
               height={400}
