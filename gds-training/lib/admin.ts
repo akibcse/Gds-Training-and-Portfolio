@@ -68,8 +68,6 @@ export const verifyAdminCredentials = async (email: string, password: string) =>
     // Explicitly check default credentials IF no custom config is found OR as a last resort
     return await isAdminCredentials(email, password);
   } catch {
-    return await isAdminCredentials(email, password);
-  } catch {
     return false;
   }
 };

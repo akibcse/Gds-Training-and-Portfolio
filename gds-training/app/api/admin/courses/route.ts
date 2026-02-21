@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/admin";
 import { getCourses, createCourse } from "@/lib/cms/courses";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 export async function GET() {
   const items = await getCourses();

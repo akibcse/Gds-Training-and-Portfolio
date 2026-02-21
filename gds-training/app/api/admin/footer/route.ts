@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/admin";
-import { getFooterItems, createFooterSection } from "@/lib/cms/footer";
+import { getFooterItems, createFooterSection, type FooterSection } from "@/lib/cms/footer";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 const mapFooterObjectToArray = (input: unknown): FooterSection[] => {
   if (!input) {

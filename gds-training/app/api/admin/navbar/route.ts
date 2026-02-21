@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { isAdminAuthenticated } from "@/lib/admin";
-import { getNavbar, createNavbarItem } from "@/lib/cms/navbar";
+import { getNavbar, createNavbarItem, type NavbarItem } from "@/lib/cms/navbar";
+import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 const mapNavbarObjectToArray = (input: unknown): NavbarItem[] => {
   if (!input) {
