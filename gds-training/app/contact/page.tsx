@@ -10,7 +10,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeo();
   const title = "Contact for GDS Training in Dhaka, Bangladesh";
   const description =
-    "Enroll in top GDS Training in Bangladesh. Contact us for Amadeus, Sabre, and Travelport courses, batch schedules, fees, and admissions for air ticketing careers.";
+    "Enroll in the best GDS Training in Bangladesh. Contact us for Amadeus, Sabre, and Travelport courses, batch schedules, and fees for air ticketing careers.";
 
   return {
     title,

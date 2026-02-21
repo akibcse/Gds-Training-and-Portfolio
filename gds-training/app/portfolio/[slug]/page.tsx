@@ -63,7 +63,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
       <h2 className="mt-8 text-2xl font-semibold text-ink">Technologies</h2>
       <div className="mt-3 flex flex-wrap gap-2">
-        {project.technologies.map((tech) => (
+        {project.technologies.map((tech: string) => (
           <span key={tech} className="rounded-full bg-aviation-100 px-3 py-1 text-xs font-semibold text-aviation-700">
             {tech}
           </span>

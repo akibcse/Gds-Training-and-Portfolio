@@ -2,13 +2,32 @@ import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin";
 import { getFooterItems, createFooterSection } from "@/lib/cms/footer";
 
+const mapFooterObjectToArray = (input: unknown): FooterSection[] => {
+  if (!input) {
+    return [];
+  }
+
+  if (Array.isArray(input)) {
+    return input as FooterSection[];
+  }
+
+  const records = input as Record<string, Omit<FooterSection, "id">>;
+  return Object.entries(records).map(([id, value]) => ({
+    id,
+    title: value?.title || "",
+    content: value?.content || "",
+    order: Number(value?.order) || 0,
+    isActive: Boolean(value?.isActive)
+  }));
+};
+
 export async function GET() {
   const items = await getFooterItems();
   return NextResponse.json(items);
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -52,7 +52,7 @@ export default function Hero({
           </p>
           <h1 className="mt-4 font-[var(--font-serif)] text-4xl leading-tight md:text-5xl">
             <span className="bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
-              {headline}
+              {seoHeadline}
             </span>
           </h1>
           <p className="mt-4 max-w-xl text-sm text-white/90 md:text-base">{description}</p>

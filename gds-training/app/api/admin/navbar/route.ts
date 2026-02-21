@@ -2,13 +2,32 @@ import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin";
 import { getNavbar, createNavbarItem } from "@/lib/cms/navbar";
 
+const mapNavbarObjectToArray = (input: unknown): NavbarItem[] => {
+  if (!input) {
+    return [];
+  }
+
+  if (Array.isArray(input)) {
+    return input as NavbarItem[];
+  }
+
+  const records = input as Record<string, Omit<NavbarItem, "id">>;
+  return Object.entries(records).map(([id, value]) => ({
+    id,
+    label: value?.label || "",
+    url: value?.url || "/",
+    order: Number(value?.order) || 0,
+    isActive: Boolean(value?.isActive)
+  }));
+};
+
 export async function GET() {
   const items = await getNavbar();
   return NextResponse.json(items);
 }
 
 export async function POST(request: Request) {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await verifyFirebaseAdminRequest(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

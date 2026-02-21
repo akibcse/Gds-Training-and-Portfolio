@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${siteUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: "weekly",
-    priority: route === "" ? 1 : 0.8
+    priority: route === "" ? 1 : route === "/courses" ? 0.9 : route === "/blog" ? 0.8 : 0.75
   }));
 
   const courseRoutes: MetadataRoute.Sitemap = courses.map((course) => ({

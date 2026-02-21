@@ -23,15 +23,17 @@ export default async function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-aviation-100/70 bg-white/85 backdrop-blur">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
+      <nav aria-label="Primary" className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
         <Link href="/" className="bg-gradient-to-r from-aviation-700 to-cyan-600 bg-clip-text text-lg font-bold text-transparent">
           {profile.name}
         </Link>
-        <div className="hidden items-center gap-5 text-sm font-medium text-ink/80 md:flex">
+        <ul className="hidden items-center gap-5 text-sm font-medium text-ink/80 md:flex">
           {navItems.map((link) => (
-            <Link key={link.id} href={link.url} className="transition hover:text-aviation-600">
-              {link.label}
-            </Link>
+            <li key={link.id}>
+              <Link href={link.url} className="transition hover:text-aviation-600">
+                {link.label}
+              </Link>
+            </li>
           ))}
           <a
             href="/#lead-form"
@@ -39,7 +41,7 @@ export default async function Navbar() {
           >
             Enroll Now
           </a>
-        </div>
+        </ul>
         <a
           href="/#lead-form"
           className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-3 py-1.5 text-xs font-semibold text-white shadow-soft md:hidden"

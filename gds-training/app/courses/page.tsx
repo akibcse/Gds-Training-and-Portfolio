@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const [seo, override] = await Promise.all([getSeo(), getSeoOverride("courses")]);
   const title = "Airline Ticketing Course in Bangladesh | GDS Training";
   const description =
-    "Professional Air Ticketing Course and GDS Training in Bangladesh. Master Amadeus, Sabre, and Travelport with job-ready reservation skills and certification.";
+    "Professional Air Ticketing Course and GDS Training in Bangladesh. Master Amadeus, Sabre, and Travelport with job-focused reservation skills and certification.";
 
   return {
     title: override?.metaTitle || title,

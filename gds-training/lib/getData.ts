@@ -159,6 +159,35 @@ export const getSeoPages = async (): Promise<SeoPageEntry[]> => {
   return [];
 };
 
+import { get, ref } from "firebase/database";
+import { db } from "./firebase";
+
+export const getSeo = async () => {
+  try {
+    const snapshot = await get(ref(db, "seo"));
+    const data = snapshot.val();
+    return data?.global || {};
+  } catch (error) {
+    console.error("Failed to fetch SEO:", error);
+    return {};
+  }
+};
+
+export const getPortfolioProjects = async () => {
+  try {
+    const snapshot = await get(ref(db, "portfolio"));
+    const data = snapshot.val();
+    if (!data) return [];
+    return Object.entries(data).map(([id, value]: [string, any]) => ({
+      id,
+      ...value
+    }));
+  } catch (error) {
+    console.error("Failed to fetch Portfolio Projects:", error);
+    return [];
+  }
+};
+
 export const getCourseBySlug = async (slug: string) => {
   return await getCmsCourseBySlug(slug) as Course;
 };

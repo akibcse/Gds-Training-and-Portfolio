@@ -21,6 +21,22 @@ const firebaseToArray = (data: unknown): unknown[] => {
     return keys.sort((a, b) => Number(a) - Number(b)).map(k => obj[k]);
   }
 
+  const values = keys.map((key) => {
+    const value = obj[key];
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      return {
+        ...(value as Record<string, unknown>),
+        id: (value as Record<string, unknown>).id ?? key
+      };
+    }
+
+    return value;
+  });
+
+  if (values.every((item) => item && typeof item === "object")) {
+    return values;
+  }
+
   return [obj];
 };
 
