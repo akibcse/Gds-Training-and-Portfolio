@@ -1,24 +1,19 @@
 import { cookies } from "next/headers";
-import { createHash } from "crypto";
 import { readJsonObject, writeJsonFile } from "@/lib/storage";
 
 export const ADMIN_COOKIE = "akib_admin_session";
 export const DEFAULT_ADMIN_EMAIL = "roadyakib@gmail.com";
-export const DEFAULT_ADMIN_PASSWORD = "Akib@12345";
 
 type AdminConfig = {
   email: string;
-  passwordHash: string;
 };
-
-const hashValue = (input: string) => createHash("sha256").update(input).digest("hex");
 
 const getAdminConfig = async (): Promise<AdminConfig> => {
   const data = await readJsonObject<AdminConfig>("admin.json");
   if (!data || !data.email) {
-    return { email: DEFAULT_ADMIN_EMAIL, passwordHash: hashValue(DEFAULT_ADMIN_PASSWORD) };
+    return { email: DEFAULT_ADMIN_EMAIL };
   }
-  return data;
+  return { email: data.email };
 };
 
 export const isAdminEmail = async (email: string) => {
@@ -26,20 +21,10 @@ export const isAdminEmail = async (email: string) => {
   return email.trim().toLowerCase() === (config.email || DEFAULT_ADMIN_EMAIL).toLowerCase();
 };
 
-export const isAdminPassword = async (password: string) => {
-  const config = await getAdminConfig();
-  return config.passwordHash === hashValue(password);
-};
-
-export const isAdminCredentials = async (email: string, password: string) =>
-  (await isAdminEmail(email)) && (await isAdminPassword(password));
-
 export const getAdminEmail = async (): Promise<string> => {
   const config = await getAdminConfig();
   return config.email || DEFAULT_ADMIN_EMAIL;
 };
-
-export const getAdminPassword = (): string => DEFAULT_ADMIN_PASSWORD;
 
 export const changeAdminEmail = async (newEmail: string) => {
   try {
@@ -48,44 +33,6 @@ export const changeAdminEmail = async (newEmail: string) => {
       ...config,
       email: newEmail.trim().toLowerCase()
     });
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-export const verifyAdminCredentials = async (email: string, password: string) => {
-  try {
-    const config = await getAdminConfig();
-
-    // If config exists, check against it
-    if (config && config.passwordHash) {
-      const emailMatch = config.email?.trim().toLowerCase() === email.trim().toLowerCase();
-      const passwordMatch = config.passwordHash === hashValue(password);
-      if (emailMatch && passwordMatch) return true;
-    }
-
-    // Explicitly check default credentials IF no custom config is found OR as a last resort
-    return await isAdminCredentials(email, password);
-  } catch {
-    return false;
-  }
-};
-
-export const changeAdminPassword = async (currentPassword: string, nextPassword: string) => {
-  try {
-    const config = await getAdminConfig();
-    const currentPasswordMatch = config.passwordHash === hashValue(currentPassword);
-
-    if (!currentPasswordMatch) {
-      return false;
-    }
-
-    await writeJsonFile("admin.json", {
-      ...config,
-      passwordHash: hashValue(nextPassword)
-    });
-
     return true;
   } catch {
     return false;
