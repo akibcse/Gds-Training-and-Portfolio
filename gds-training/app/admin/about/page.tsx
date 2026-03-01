@@ -218,6 +218,16 @@ export default function AboutPage() {
                                     onChange={(e) => setProfile({ ...profile, description: e.target.value })}
                                 />
                             </div>
+                            <div>
+                                <label className="text-xs font-bold uppercase text-ink/50">Hero Image URL</label>
+                                <input
+                                    className="w-full rounded-lg border border-aviation-100 bg-aviation-50/30 px-3 py-2 text-sm"
+                                    placeholder="https://example.com/hero-image.jpg"
+                                    value={portfolioProfile.profileImage}
+                                    onChange={(e) => setPortfolioProfile({ ...portfolioProfile, profileImage: e.target.value })}
+                                />
+                                <p className="mt-1 text-xs text-ink/50">Used in homepage hero and about profile image.</p>
+                            </div>
                         </div>
                     </article>
 

@@ -36,6 +36,16 @@ export default function SeoPage() {
 
     const { toast, showToast, hideToast } = useToast();
 
+    const globalPreviewUrl = globalSeo?.siteUrl?.trim() || "https://training.airtechaviation.click";
+    const globalPreviewTitle = globalSeo?.defaultTitle?.trim() || "Homepage Title";
+    const globalPreviewDescription = globalSeo?.defaultDescription?.trim() || "Homepage description appears here.";
+    const globalPreviewImage = globalSeo?.defaultOgImage?.trim() || "";
+
+    const pagePreviewUrl = `${globalPreviewUrl.replace(/\/$/, "")}/${(pageSeo?.slug || "").replace(/^\//, "")}`;
+    const pagePreviewTitle = pageSeo?.title?.trim() || globalPreviewTitle;
+    const pagePreviewDescription = pageSeo?.description?.trim() || globalPreviewDescription;
+    const pagePreviewImage = pageSeo?.ogImage?.trim() || globalPreviewImage;
+
     useEffect(() => {
         fetchGlobalSeo();
     }, []);
@@ -160,11 +170,21 @@ export default function SeoPage() {
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Site URL</label>
-                                        <input name="siteUrl" defaultValue={globalSeo?.siteUrl} className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all" />
+                                        <input
+                                            name="siteUrl"
+                                            value={globalSeo?.siteUrl || ""}
+                                            onChange={(e) => setGlobalSeo((prev) => (prev ? { ...prev, siteUrl: e.target.value } : prev))}
+                                            className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all"
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Default Title</label>
-                                        <input name="defaultTitle" defaultValue={globalSeo?.defaultTitle} className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all" />
+                                        <input
+                                            name="defaultTitle"
+                                            value={globalSeo?.defaultTitle || ""}
+                                            onChange={(e) => setGlobalSeo((prev) => (prev ? { ...prev, defaultTitle: e.target.value } : prev))}
+                                            className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all"
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Title Template</label>
@@ -180,7 +200,13 @@ export default function SeoPage() {
                                 <div className="space-y-4">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Default Description</label>
-                                        <textarea name="defaultDescription" defaultValue={globalSeo?.defaultDescription} rows={3} className="w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 p-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all resize-none" />
+                                        <textarea
+                                            name="defaultDescription"
+                                            value={globalSeo?.defaultDescription || ""}
+                                            onChange={(e) => setGlobalSeo((prev) => (prev ? { ...prev, defaultDescription: e.target.value } : prev))}
+                                            rows={3}
+                                            className="w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 p-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all resize-none"
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Default Keywords (Comma separated)</label>
@@ -189,6 +215,16 @@ export default function SeoPage() {
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Twitter Handle</label>
                                         <input name="twitterHandle" defaultValue={globalSeo?.twitterHandle} placeholder="@username" className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all" />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">SERP / Social Preview Image URL</label>
+                                        <input
+                                            name="defaultOgImage"
+                                            value={globalSeo?.defaultOgImage || ""}
+                                            onChange={(e) => setGlobalSeo((prev) => (prev ? { ...prev, defaultOgImage: e.target.value } : prev))}
+                                            placeholder="https://example.com/preview-image.jpg"
+                                            className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 focus:ring-4 focus:ring-aviation-500/5 outline-none transition-all"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -208,6 +244,20 @@ export default function SeoPage() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="space-y-4 rounded-2xl border border-aviation-100 bg-aviation-50/40 p-5">
+                            <p className="text-xs font-bold uppercase tracking-wider text-ink/50">SERP Preview</p>
+                            <div>
+                                <p className="text-xs text-emerald-700">{globalPreviewUrl}</p>
+                                <p className="mt-1 text-lg font-semibold text-blue-700">{globalPreviewTitle}</p>
+                                <p className="mt-1 text-sm text-ink/70">{globalPreviewDescription}</p>
+                            </div>
+                            {globalPreviewImage ? (
+                                <div className="overflow-hidden rounded-xl border border-aviation-100 bg-white">
+                                    <img src={globalPreviewImage} alt="Global SEO preview" className="h-40 w-full object-cover" />
+                                </div>
+                            ) : null}
                         </div>
 
                         <div className="flex justify-end pt-6 border-t border-aviation-50">
@@ -245,7 +295,12 @@ export default function SeoPage() {
                                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Meta Title</label>
-                                        <input name="title" defaultValue={pageSeo.title} className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 outline-none transition-all" />
+                                        <input
+                                            name="title"
+                                            value={pageSeo.title}
+                                            onChange={(e) => setPageSeo((prev) => (prev ? { ...prev, title: e.target.value } : prev))}
+                                            className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 outline-none transition-all"
+                                        />
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Keywords</label>
@@ -253,13 +308,43 @@ export default function SeoPage() {
                                     </div>
                                     <div className="space-y-1.5 md:col-span-2">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">Meta Description</label>
-                                        <textarea name="description" defaultValue={pageSeo.description} rows={3} className="w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 p-4 text-sm focus:border-aviation-300 outline-none transition-all resize-none" />
+                                        <textarea
+                                            name="description"
+                                            value={pageSeo.description}
+                                            onChange={(e) => setPageSeo((prev) => (prev ? { ...prev, description: e.target.value } : prev))}
+                                            rows={3}
+                                            className="w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 p-4 text-sm focus:border-aviation-300 outline-none transition-all resize-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5 md:col-span-2">
+                                        <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">SERP / Social Preview Image URL</label>
+                                        <input
+                                            name="ogImage"
+                                            value={pageSeo.ogImage}
+                                            onChange={(e) => setPageSeo((prev) => (prev ? { ...prev, ogImage: e.target.value } : prev))}
+                                            placeholder="https://example.com/page-preview-image.jpg"
+                                            className="h-12 w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 px-4 text-sm focus:border-aviation-300 outline-none transition-all"
+                                        />
                                     </div>
                                     <div className="space-y-1.5 md:col-span-2">
                                         <label className="text-xs font-bold text-ink/50 uppercase tracking-wider ml-1">JSON-LD Structured Data (LD+JSON)</label>
                                         <textarea name="jsonLd" defaultValue={pageSeo.jsonLd} rows={5} placeholder='{ "@context": "https://schema.org", ... }' className="w-full rounded-2xl border border-aviation-100 bg-aviation-50/30 p-4 text-sm font-mono focus:border-aviation-300 outline-none transition-all resize-none" />
                                     </div>
                                 </div>
+                                <div className="space-y-4 rounded-2xl border border-aviation-100 bg-aviation-50/40 p-5">
+                                    <p className="text-xs font-bold uppercase tracking-wider text-ink/50">Page SERP Preview</p>
+                                    <div>
+                                        <p className="text-xs text-emerald-700">{pagePreviewUrl}</p>
+                                        <p className="mt-1 text-lg font-semibold text-blue-700">{pagePreviewTitle}</p>
+                                        <p className="mt-1 text-sm text-ink/70">{pagePreviewDescription}</p>
+                                    </div>
+                                    {pagePreviewImage ? (
+                                        <div className="overflow-hidden rounded-xl border border-aviation-100 bg-white">
+                                            <img src={pagePreviewImage} alt="Page SEO preview" className="h-40 w-full object-cover" />
+                                        </div>
+                                    ) : null}
+                                </div>
+
                                 <div className="flex justify-end pt-4">
                                     <button
                                         type="submit"
