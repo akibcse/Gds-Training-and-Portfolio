@@ -11,6 +11,7 @@ import {
     Briefcase,
     Users,
     Globe,
+    User,
     ChevronRight,
     LogOut
 } from "lucide-react";
@@ -23,6 +24,7 @@ const SIDEBAR_ITEMS = [
     { label: "Courses", icon: BookOpen, href: "/admin/courses" },
     { label: "Blogs", icon: FileText, href: "/admin/blogs" },
     { label: "Portfolio", icon: Briefcase, href: "/admin/portfolio" },
+    { label: "About", icon: User, href: "/admin/about" },
     { label: "Leads CRM", icon: Users, href: "/admin/leads" },
     { label: "SEO Manager", icon: Globe, href: "/admin/seo" },
     { label: "Settings", icon: Settings, href: "/admin/settings" },
