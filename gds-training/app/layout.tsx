@@ -25,6 +25,20 @@ const serif = Merriweather({
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getGlobalSeo();
   const fallbackSiteUrl = "https://airtech-aviation-ota.vercel.app";
+  const fallbackGoogleVerification = "wyMy_PJ7kZvizW2GTPUZN9NSmNTaDjsbdjcJ3C3hrlY";
+
+  const normalizeGoogleVerification = (value?: string | null) => {
+    if (!value) return fallbackGoogleVerification;
+
+    const trimmed = value.trim();
+    const contentMatch = trimmed.match(/content\s*=\s*['\"]([^'\"]+)['\"]/i);
+
+    if (contentMatch?.[1]) {
+      return contentMatch[1];
+    }
+
+    return trimmed;
+  };
 
   let siteUrl = seo?.siteUrl || fallbackSiteUrl;
   try {
@@ -46,7 +60,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: defaultDescription,
     keywords: seo?.defaultKeywords || ["GDS", "Training", "Aviation"],
     verification: {
-      google: seo?.googleVerification || "8WbeVkSHzkcfWfMiESJhjf4sBnXl28DRN8lNz2sYzl0",
+      google: normalizeGoogleVerification(seo?.googleVerification),
     },
     robots: {
       index: true,
