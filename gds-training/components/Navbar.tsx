@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProfile } from "@/lib/getData";
 import { getNavbar } from "@/lib/cms/navbar";
+import AuthButtons from "./AuthButtons";
 
 const DEFAULT_NAVBAR = [
   { id: "1", label: "Home", url: "/", order: 1, isActive: true },
@@ -35,19 +36,35 @@ export default async function Navbar() {
               </Link>
             </li>
           ))}
+          <Link
+            href="/courses"
+            className="font-bold text-aviation-600 transition hover:text-aviation-700"
+          >
+            Buy Courses
+          </Link>
           <a
             href="/#lead-form"
             className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-4 py-2 text-white shadow-soft transition hover:brightness-105"
           >
             Enroll Now
           </a>
+          <AuthButtons />
         </ul>
-        <a
-          href="/#lead-form"
-          className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-3 py-1.5 text-xs font-semibold text-white shadow-soft md:hidden"
-        >
-          Enroll
-        </a>
+        <div className="flex items-center gap-3 md:hidden">
+          <Link
+            href="/courses"
+            className="text-xs font-bold text-aviation-600"
+          >
+            Buy Courses
+          </Link>
+          <a
+            href="/#lead-form"
+            className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-3 py-1.5 text-xs font-semibold text-white shadow-soft"
+          >
+            Enroll
+          </a>
+          <AuthButtons />
+        </div>
       </nav>
     </header>
   );

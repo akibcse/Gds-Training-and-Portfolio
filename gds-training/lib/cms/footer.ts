@@ -26,6 +26,7 @@ export const getFooterItems = async (): Promise<FooterSection[]> => {
                 id: key,
                 ...(value as any)
             }))
+            .filter((section: any) => section.isActive)
             .sort((a, b) => a.order - b.order);
     } catch (error) {
         console.error("Error fetching footer:", error);

@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
+import ClientInit from "@/components/ClientInit";
 import { getGlobalSeo } from "@/lib/cms/seo";
 
 const sans = DM_Sans({
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body className="font-[var(--font-sans)] text-ink">
+        <ClientInit />
         <Navbar />
         <PageTransition>
           <main className="pb-20 md:pb-0">{children}</main>

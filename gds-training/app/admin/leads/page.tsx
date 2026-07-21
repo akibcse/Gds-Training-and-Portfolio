@@ -145,11 +145,18 @@ export default function LeadsPage() {
             )
         },
         {
-            header: "Course Interest",
+            header: "Course & Request Type",
             accessor: (l: Lead) => (
-                <span className="rounded-lg bg-aviation-50 px-2.5 py-1 text-xs font-bold text-aviation-700">
-                    {l.course}
-                </span>
+                <div className="space-y-1">
+                    <span className="inline-block rounded-lg bg-aviation-50 px-2.5 py-1 text-xs font-bold text-aviation-700">
+                        {l.course}
+                    </span>
+                    {l.message && (
+                        <div className="text-[11px] font-semibold text-cyan-700 bg-cyan-50 border border-cyan-100 rounded px-2 py-0.5 w-fit">
+                            {l.message}
+                        </div>
+                    )}
+                </div>
             )
         },
         {

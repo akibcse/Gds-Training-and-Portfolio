@@ -16,6 +16,15 @@ export type Course = {
     faqs: { question: string; answer: string }[];
     keywords: string[];
     relatedBlogSlugs: string[];
+    // LMS Specific Fields
+    price?: number;
+    discountPrice?: number;
+    rating?: number;
+    studentCount?: number;
+    thumbnail?: string;
+    instructorName?: string;
+    level?: string;
+    category?: string;
 };
 
 const NODE_PATH = "cms/courses";

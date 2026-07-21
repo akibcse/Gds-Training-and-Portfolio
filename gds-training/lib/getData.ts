@@ -42,6 +42,15 @@ export type Course = {
   keywords: string[];
   relatedBlogSlugs: string[];
   relatedCourseSlugs?: string[];
+  // LMS Specific Fields
+  price?: number;
+  discountPrice?: number;
+  rating?: number;
+  studentCount?: number;
+  thumbnail?: string;
+  instructorName?: string;
+  level?: string;
+  category?: string;
 };
 
 export type Blog = {

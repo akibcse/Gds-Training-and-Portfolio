@@ -10,7 +10,8 @@ import {
     List,
     TrendingUp,
     ArrowUpRight,
-    ArrowDownRight
+    ArrowDownRight,
+    GraduationCap
 } from "lucide-react";
 import Link from "next/link";
 
@@ -81,12 +82,12 @@ export default function AdminDashboard() {
     }, []);
 
     const statCards = [
+        { label: "Enrolled Students", value: "Manage", icon: GraduationCap, color: "bg-emerald-600", trend: "Active", trendUp: true, href: "/admin/payments" },
         { label: "Total Courses", value: stats?.courses ?? 0, icon: BookOpen, color: "bg-blue-500", trend: "+2 this month", trendUp: true, href: "/admin/courses" },
         { label: "Total Blogs", value: stats?.blogs ?? 0, icon: FileText, color: "bg-purple-500", trend: "+5 this month", trendUp: true, href: "/admin/blogs" },
         { label: "Portfolio Projects", value: stats?.portfolio ?? 0, icon: Briefcase, color: "bg-amber-500", trend: "Maintained", trendUp: true, href: "/admin/portfolio" },
         { label: "Total Leads", value: stats?.leads ?? 0, icon: Users, color: "bg-emerald-500", trend: "+12% vs last week", trendUp: true, href: "/admin/leads" },
         { label: "Active Nav Items", value: stats?.activeNavbar ?? 0, icon: Menu, color: "bg-aviation-600", trend: "Balanced", trendUp: true, href: "/admin/navigation" },
-        { label: "Footer Sections", value: stats?.activeFooter ?? 0, icon: List, color: "bg-indigo-500", trend: "Optimized", trendUp: true, href: "/admin/footer" },
     ];
 
     if (loading) {

@@ -82,5 +82,19 @@ export async function POST(request: Request) {
 
   await writeJsonFile("users.json", users);
 
+  // Also save to Firebase cms/leads so it appears in Admin Leads CRM
+  try {
+    const { createLead } = await import("@/lib/cms/leads");
+    await createLead({
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      course: lead.course,
+      message: `Demo Request: ${lead.type === 'booking' ? 'Book Free Demo Class' : 'Course Registration'}`
+    });
+  } catch (err) {
+    console.error("Failed to push lead to Firebase:", err);
+  }
+
   return NextResponse.json({ success: true });
 }

@@ -13,12 +13,14 @@ import {
     Globe,
     User,
     ChevronRight,
-    LogOut
+    LogOut,
+    GraduationCap
 } from "lucide-react";
 import { useState } from "react";
 
 const SIDEBAR_ITEMS = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
+    { label: "Enrolled Students", icon: GraduationCap, href: "/admin/payments" },
     { label: "Navigation", icon: Menu, href: "/admin/navigation" },
     { label: "Footer", icon: FileText, href: "/admin/footer" },
     { label: "Courses", icon: BookOpen, href: "/admin/courses" },
