@@ -14,6 +14,9 @@ import {
     User,
     ChevronRight,
     LogOut,
+    Image,
+    Sliders,
+    Shield,
     GraduationCap
 } from "lucide-react";
 import { useState } from "react";
@@ -21,11 +24,14 @@ import { useState } from "react";
 const SIDEBAR_ITEMS = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
     { label: "Enrolled Students", icon: GraduationCap, href: "/admin/payments" },
-    { label: "Navigation", icon: Menu, href: "/admin/navigation" },
-    { label: "Footer", icon: FileText, href: "/admin/footer" },
+    { label: "User Management", icon: Shield, href: "/admin/users" },
+    { label: "Hero Slider", icon: Sliders, href: "/admin/slider" },
+    { label: "Image Gallery", icon: Image, href: "/admin/gallery" },
     { label: "Courses", icon: BookOpen, href: "/admin/courses" },
     { label: "Blogs", icon: FileText, href: "/admin/blogs" },
     { label: "Portfolio", icon: Briefcase, href: "/admin/portfolio" },
+    { label: "Navigation", icon: Menu, href: "/admin/navigation" },
+    { label: "Footer", icon: FileText, href: "/admin/footer" },
     { label: "About", icon: User, href: "/admin/about" },
     { label: "Leads CRM", icon: Users, href: "/admin/leads" },
     { label: "SEO Manager", icon: Globe, href: "/admin/seo" },

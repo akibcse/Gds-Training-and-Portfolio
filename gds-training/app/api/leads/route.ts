@@ -82,18 +82,24 @@ export async function POST(request: Request) {
 
   await writeJsonFile("users.json", users);
 
-  // Also save to Firebase cms/leads so it appears in Admin Leads CRM
+  // Also save to Firebase cms/leads so it appears in Admin Leads CRM with 2.5s timeout fallback
   try {
     const { createLead } = await import("@/lib/cms/leads");
-    await createLead({
-      name: lead.name,
-      email: lead.email,
-      phone: lead.phone,
-      course: lead.course,
-      message: `Demo Request: ${lead.type === 'booking' ? 'Book Free Demo Class' : 'Course Registration'}`
-    });
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Firebase write timeout")), 2500)
+    );
+    await Promise.race([
+      createLead({
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        course: lead.course,
+        message: `Demo Request: ${lead.type === 'booking' ? 'Book Free Demo Class' : 'Course Registration'}`
+      }),
+      timeoutPromise
+    ]);
   } catch (err) {
-    console.error("Failed to push lead to Firebase:", err);
+    console.error("Firebase lead save bypassed or timed out:", err);
   }
 
   return NextResponse.json({ success: true });

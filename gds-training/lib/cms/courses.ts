@@ -1,30 +1,86 @@
 import { ref, get, push, update, remove } from "firebase/database";
 import { getFirebaseDatabase } from "../firebase";
 
+export type ModuleLesson = {
+  id?: string;
+  title: string;
+  videoUrl?: string;
+  pdfUrl?: string;
+  duration?: string;
+  isFreePreview?: boolean;
+};
+
+export type CourseModule = {
+  id?: string;
+  title: string;
+  duration?: string;
+  lessons: ModuleLesson[];
+};
+
+export type CourseFaq = {
+  question: string;
+  answer: string;
+};
+
 export type Course = {
-    id: string;
-    slug: string;
-    title: string;
-    excerpt: string;
-    description: string;
-    duration: string;
-    certification: string;
-    mode: string;
-    softwareCovered: string[];
-    curriculum: string[];
-    careerOutcomes: string[];
-    faqs: { question: string; answer: string }[];
-    keywords: string[];
-    relatedBlogSlugs: string[];
-    // LMS Specific Fields
-    price?: number;
-    discountPrice?: number;
-    rating?: number;
-    studentCount?: number;
-    thumbnail?: string;
-    instructorName?: string;
-    level?: string;
-    category?: string;
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string; // shortDescription
+  description: string; // fullDescription
+
+  // Instructor
+  instructorName?: string;
+  instructorImage?: string;
+
+  // Media
+  thumbnail?: string;
+  previewVideo?: string;
+
+  // Course Details
+  category?: string;
+  level?: string;
+  duration?: string;
+  language?: string;
+  mode?: string;
+  certification?: string;
+
+  // Statistics
+  rating?: number;
+  reviewCount?: number;
+  studentCount?: number;
+
+  // Pricing
+  price?: number; // regularPrice
+  discountPrice?: number; // currentPrice
+  discount?: number; // discount percentage
+  hideFee?: boolean; // toggle to hide course fee
+
+  // Badges & Status
+  badgeText?: string;
+  bestseller?: boolean;
+  featured?: boolean;
+  published?: boolean;
+  certificate?: boolean;
+
+  // Curriculum & Learning
+  curriculum?: CourseModule[] | string[];
+  learningOutcomes?: string[]; // careerOutcomes
+  careerOutcomes?: string[];
+  requirements?: string[];
+  softwareCovered?: string[];
+  tags?: string[];
+  faqs?: CourseFaq[];
+  relatedBlogSlugs?: string[];
+
+  // SEO
+  seoTitle?: string;
+  seoDescription?: string;
+  keywords?: string[];
+
+  // Timestamps
+  updatedAt?: number | string;
+  createdAt?: number | string;
 };
 
 const NODE_PATH = "cms/courses";

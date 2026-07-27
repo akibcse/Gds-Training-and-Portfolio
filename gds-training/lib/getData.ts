@@ -26,32 +26,123 @@ export type Profile = {
   jobPlacementSupport: boolean;
 };
 
-export type Course = {
-  id?: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  description: string;
-  duration: string;
-  certification: string;
-  mode: string;
-  softwareCovered: string[];
-  curriculum: string[];
-  careerOutcomes: string[];
-  faqs: { question: string; answer: string }[];
-  keywords: string[];
-  relatedBlogSlugs: string[];
-  relatedCourseSlugs?: string[];
-  // LMS Specific Fields
-  price?: number;
-  discountPrice?: number;
-  rating?: number;
-  studentCount?: number;
-  thumbnail?: string;
-  instructorName?: string;
-  level?: string;
-  category?: string;
-};
+import type { Course, CourseModule, ModuleLesson, CourseFaq } from "./cms/courses";
+export type { Course, CourseModule, ModuleLesson, CourseFaq };
+
+export function normalizeCourse(c: Partial<Course> | null | undefined): Course {
+  if (!c) {
+    return {
+      id: "",
+      slug: "",
+      title: "Untitled Course",
+      excerpt: "",
+      description: "",
+      instructorName: "Aviation Expert",
+      instructorImage: "",
+      thumbnail: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80",
+      previewVideo: "",
+      category: "Aviation & GDS",
+      level: "Beginner",
+      duration: "Self-Paced",
+      language: "English / Bangla",
+      mode: "Online & Offline",
+      certification: "Verified Certificate",
+      rating: 4.8,
+      reviewCount: 125,
+      studentCount: 1250,
+      price: 5000,
+      discountPrice: 2500,
+      discount: 50,
+      hideFee: false,
+      badgeText: "Bestseller",
+      bestseller: true,
+      featured: false,
+      published: true,
+      certificate: true,
+      curriculum: [],
+      learningOutcomes: [],
+      requirements: [],
+      softwareCovered: [],
+      tags: [],
+      faqs: [],
+      relatedBlogSlugs: [],
+      seoTitle: "",
+      seoDescription: "",
+      keywords: []
+    };
+  }
+
+  const price = c.price ?? 5000;
+  const discountPrice = c.discountPrice ?? 2500;
+  const computedDiscount = c.discount ?? (price > discountPrice ? Math.round(((price - discountPrice) / price) * 100) : 0);
+  const hideFee = c.hideFee ?? false;
+
+  // Normalize curriculum if it's an array of strings (legacy) or CourseModule[]
+  let normalizedCurriculum: CourseModule[] = [];
+  if (Array.isArray(c.curriculum)) {
+    if (c.curriculum.length > 0 && typeof c.curriculum[0] === "string") {
+      normalizedCurriculum = [
+        {
+          id: "mod-legacy",
+          title: "Course Curriculum Overview",
+          duration: c.duration || "Full Course",
+          lessons: (c.curriculum as string[]).map((title, idx) => ({
+            id: `les-${idx}`,
+            title,
+            duration: "Lesson " + (idx + 1)
+          }))
+        }
+      ];
+    } else {
+      normalizedCurriculum = c.curriculum as CourseModule[];
+    }
+  }
+
+  const outcomes = c.learningOutcomes?.length ? c.learningOutcomes : (c.careerOutcomes || []);
+
+  return {
+    id: c.id || "",
+    slug: c.slug || "",
+    title: c.title || "Untitled Course",
+    excerpt: c.excerpt || "",
+    description: c.description || "",
+    instructorName: c.instructorName || "Aviation Expert",
+    instructorImage: c.instructorImage || "",
+    thumbnail: c.thumbnail || "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80",
+    previewVideo: c.previewVideo || "",
+    category: c.category || "Aviation & GDS",
+    level: c.level || "Beginner",
+    duration: c.duration || "3 Months",
+    language: c.language || "English / Bangla",
+    mode: c.mode || "Online & Offline",
+    certification: c.certification || "Verified Certificate",
+    rating: c.rating ?? 4.8,
+    reviewCount: c.reviewCount ?? c.studentCount ?? 125,
+    studentCount: c.studentCount ?? 1250,
+    price,
+    discountPrice,
+    discount: computedDiscount,
+    hideFee,
+    badgeText: c.badgeText || (c.bestseller ? "Bestseller" : c.featured ? "Featured" : ""),
+    bestseller: c.bestseller ?? false,
+    featured: c.featured ?? false,
+    published: c.published ?? true,
+    certificate: c.certificate ?? true,
+    curriculum: normalizedCurriculum,
+    learningOutcomes: outcomes,
+    careerOutcomes: outcomes,
+    requirements: c.requirements || [],
+    softwareCovered: c.softwareCovered || [],
+    tags: c.tags || c.softwareCovered || [],
+    faqs: c.faqs || [],
+    relatedBlogSlugs: c.relatedBlogSlugs || [],
+    seoTitle: c.seoTitle || c.title || "",
+    seoDescription: c.seoDescription || c.excerpt || "",
+    keywords: c.keywords || [],
+    updatedAt: c.updatedAt,
+    createdAt: c.createdAt
+  };
+}
 
 export type Blog = {
   id?: string;
@@ -154,22 +245,21 @@ const loadJsonObject = async <T>(fileName: string): Promise<T | null> => {
 
 // --- Updated to use CMS Modules ---
 export const getProfile = async () => (await loadJsonObject<Profile>("profile.json"))!;
-export const getCourses = () => getCmsCourses();
 export const getBlogs = () => getCmsBlogs();
 export const getTestimonials = () => loadJson<Testimonial[]>("testimonials.json");
 export const getSeo = async () => (await getGlobalSeo()) as Seo;
 export const getPortfolio = async () => (await loadJsonObject<Portfolio>("portfolio.json"))!;
 export const getPortfolioProjects = () => getCmsPortfolioProjects();
-export const getSeoPages = async (): Promise<SeoPageEntry[]> => {
-  // This is a mapping adapter for getPageSeo
-  // In the real app, we might want to fetch all pages, but typically it's called by slug.
-  // For now, returning empty array as individual pages should use getPageSeo directly in their contexts.
-  // But lib/seo-settings.ts calls this.
-  return [];
+export const getSeoPages = async (): Promise<SeoPageEntry[]> => [];
+
+export const getCourses = async (): Promise<Course[]> => {
+  const raw = await getCmsCourses();
+  return raw.map((c) => normalizeCourse(c));
 };
 
-export const getCourseBySlug = async (slug: string) => {
-  return await getCmsCourseBySlug(slug) as Course;
+export const getCourseBySlug = async (slug: string): Promise<Course | null> => {
+  const raw = await getCmsCourseBySlug(slug);
+  return raw ? normalizeCourse(raw) : null;
 };
 
 export const getBlogBySlug = async (slug: string) => {

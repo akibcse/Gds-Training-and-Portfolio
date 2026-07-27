@@ -11,6 +11,8 @@ import TestimonialCard from "@/components/TestimonialCard";
 import { getCourses, getPortfolio, getProfile, getSeo, getTestimonials } from "@/lib/getData";
 import { faqSchema, localBusinessSchema, organizationSchema, personSchema, websiteSchema } from "@/lib/structuredData";
 
+import Gallery from "@/components/Gallery";
+
 export const dynamic = 'force-dynamic';
 
 const homeFaqs = [
@@ -68,17 +70,15 @@ export default async function HomePage() {
       <SEO id="local-business-schema" data={localBusinessSchema(profile, seo.siteUrl)} />
       <SEO id="home-faq-schema" data={faqSchema(homeFaqs)} />
 
-      <div className="mx-auto max-w-6xl px-4 pt-10 md:px-6">
-        <Hero
-          headline={profile.headline}
-          description={profile.description}
-          studentsTrained={profile.studentsTrained}
-          experienceYears={profile.experienceYears}
-          whatsapp={profile.whatsapp}
-          profileImage={portfolioData.profileImage}
-          instructorName={portfolioData.fullName}
-        />
-      </div>
+      <Hero
+        headline={profile.headline}
+        description={profile.description}
+        studentsTrained={profile.studentsTrained}
+        experienceYears={profile.experienceYears}
+        whatsapp={profile.whatsapp}
+        profileImage={portfolioData.profileImage}
+        instructorName={portfolioData.fullName}
+      />
 
       <Reveal className="mx-auto max-w-6xl px-4 py-10 md:px-6" delay={0.05}>
         <div className="grid items-start gap-6 md:grid-cols-[1.2fr_1fr]">
@@ -134,6 +134,9 @@ export default async function HomePage() {
         </div>
       </Reveal>
 
+      {/* Dynamic Image Gallery Showcase */}
+      <Gallery />
+
       <Reveal className="mx-auto max-w-6xl px-4 py-10 md:px-6" delay={0.13}>
         <h2 className="text-3xl font-semibold text-ink">FAQ: Air Ticketing &amp; GDS Training in Dhaka</h2>
         <div className="mt-6 space-y-4">
@@ -164,7 +167,7 @@ export default async function HomePage() {
       </section>
 
       <FloatingWhatsAppButton href={profile.whatsapp} />
-      <StickyEnrollBar whatsapp={profile.whatsapp} />
+      <StickyEnrollBar whatsapp={profile.whatsapp} phone={profile.phone} />
     </>
   );
 }

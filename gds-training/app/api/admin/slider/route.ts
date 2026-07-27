@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import { getCourses, createCourse } from "@/lib/cms/courses";
+import { getHeroSlides, createHeroSlide } from "@/lib/cms/slider";
 import { verifyFirebaseAdminRequest } from "@/lib/firebase-admin-auth";
 
 export async function GET() {
-  const items = await getCourses();
+  const items = await getHeroSlides();
   return NextResponse.json(items);
 }
 
@@ -15,15 +14,11 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    if (!body.title || !body.slug) {
-      return NextResponse.json({ error: "Title and Slug are required." }, { status: 400 });
+    if (!body.title || !body.bgImageUrl) {
+      return NextResponse.json({ error: "Title and Image URL are required." }, { status: 400 });
     }
 
-    const id = await createCourse(body);
-    revalidatePath("/courses");
-    if (body.slug) {
-      revalidatePath(`/courses/${body.slug}`);
-    }
+    const id = await createHeroSlide(body);
     return NextResponse.json({ id, ...body });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

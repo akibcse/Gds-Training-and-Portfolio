@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProfile } from "@/lib/getData";
 import { getNavbar } from "@/lib/cms/navbar";
+import MobileMenu from "@/components/MobileMenu";
 import AuthButtons from "./AuthButtons";
 
 const DEFAULT_NAVBAR = [
@@ -19,15 +20,18 @@ export default async function Navbar() {
   if (!navItems || navItems.length === 0) {
     navItems = DEFAULT_NAVBAR as any;
   } else {
-    navItems = navItems.filter(item => item.isActive);
+    navItems = navItems.filter((item) => item.isActive);
   }
 
   return (
     <header className="sticky top-0 z-50 border-b border-aviation-100/70 bg-white/85 backdrop-blur">
       <nav aria-label="Primary" className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
+        {/* Logo */}
         <Link href="/" className="bg-gradient-to-r from-aviation-700 to-cyan-600 bg-clip-text text-lg font-bold text-transparent">
           {profile.name}
         </Link>
+
+        {/* Desktop nav */}
         <ul className="hidden items-center gap-5 text-sm font-medium text-ink/80 md:flex">
           {navItems.map((link) => (
             <li key={link.id}>
@@ -36,10 +40,7 @@ export default async function Navbar() {
               </Link>
             </li>
           ))}
-          <Link
-            href="/courses"
-            className="font-bold text-aviation-600 transition hover:text-aviation-700"
-          >
+          <Link href="/courses" className="font-bold text-aviation-600 transition hover:text-aviation-700">
             Buy Courses
           </Link>
           <a
@@ -50,20 +51,10 @@ export default async function Navbar() {
           </a>
           <AuthButtons />
         </ul>
-        <div className="flex items-center gap-3 md:hidden">
-          <Link
-            href="/courses"
-            className="text-xs font-bold text-aviation-600"
-          >
-            Buy Courses
-          </Link>
-          <a
-            href="/#lead-form"
-            className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-3 py-1.5 text-xs font-semibold text-white shadow-soft"
-          >
-            Enroll
-          </a>
-          <AuthButtons />
+
+        {/* Mobile: hamburger menu */}
+        <div className="md:hidden">
+          <MobileMenu navItems={navItems} />
         </div>
       </nav>
     </header>

@@ -1,7 +1,11 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import type { HeroSlide } from "@/lib/cms/slider";
 
 type Props = {
   headline: string;
@@ -26,20 +30,41 @@ export default function Hero({
   const resolvedProfileImage = profileImage?.trim() || "/images/md-akib-hasan.svg";
   const isRemoteImage = /^https?:\/\//.test(resolvedProfileImage);
 
+  /* ── Slider state ── */
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/slider")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setSlides(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
+
+  const handlePrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
+
+  useEffect(() => {
+    if (slides.length <= 1 || isPaused) return;
+    const timer = setInterval(handleNext, 6000);
+    return () => clearInterval(timer);
+  }, [slides.length, isPaused, handleNext]);
+
+  const activeSlide = slides[currentIndex];
+
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1920&q=80"
-          alt="Airlines Background"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-aviation-900/90 via-aviation-800/85 to-aviation-900/90" />
-        <div className="absolute inset-0 bg-gradient-to-t from-aviation-900/60 via-transparent to-aviation-900/40" />
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`, backgroundSize: "60px 60px" }} />
-      </div>
+
+      {/* ── Part 1: Instructor hero content ── */}
+
       <div className="hero-gradient animate-gradientShift relative z-10 mx-auto grid max-w-6xl gap-8 px-5 pb-10 pt-14 text-white md:grid-cols-2 md:px-10">
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 20 }}
@@ -122,6 +147,118 @@ export default function Hero({
         <div className="pointer-events-none absolute -left-12 top-8 h-36 w-36 rounded-full bg-white/20 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-20 right-10 h-44 w-44 rounded-full bg-cyan-300/35 blur-3xl" />
       </div>
+
+      {/* ── Part 2: CMS Image Slider (inside same section, below instructor grid) ── */}
+      {slides.length > 0 && activeSlide && (
+        <div
+          className="relative z-10 mx-auto max-w-6xl px-5 pb-10 md:px-10"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          {/* Divider */}
+          <div className="mb-6 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/20" />
+            <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white/60 backdrop-blur-sm">
+              Featured Announcements
+            </span>
+            <div className="h-px flex-1 bg-white/20" />
+          </div>
+
+          {/* Slide card */}
+          <div className="relative overflow-hidden rounded-3xl border border-aviation-700/40 bg-aviation-900/70 shadow-xl">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSlide.id + currentIndex}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+                className="relative"
+              >
+                {/* Slide background image */}
+                {activeSlide.bgImageUrl && (
+                  <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={activeSlide.bgImageUrl}
+                      alt={activeSlide.title}
+                      className="h-full w-full object-cover opacity-30"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/60 to-transparent" />
+                  </div>
+                )}
+
+                {/* Slide content */}
+                <div className="relative z-10 flex flex-col items-start gap-4 px-7 py-8 text-white md:flex-row md:items-center md:justify-between">
+                  <div className="flex flex-col gap-2">
+                    {activeSlide.badgeText && (
+                      <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 px-3 py-1 text-[11px] font-bold text-amber-300">
+                        <Sparkles className="h-3 w-3" />
+                        {activeSlide.badgeText}
+                      </span>
+                    )}
+                    <h2 className="text-xl font-bold leading-snug tracking-tight md:text-2xl">
+                      <span className="bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent">
+                        {activeSlide.title}
+                      </span>
+                    </h2>
+                    {activeSlide.subtitle && (
+                      <p className="max-w-lg text-sm text-white/75">{activeSlide.subtitle}</p>
+                    )}
+                  </div>
+
+                  {activeSlide.ctaText && (
+                    <Link
+                      href={activeSlide.ctaLink || "/courses"}
+                      className="shrink-0 rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-aviation-600/25 transition-all hover:scale-105 hover:brightness-110 active:scale-95"
+                    >
+                      {activeSlide.ctaText}
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Prev / Next arrows */}
+            {slides.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  aria-label="Previous slide"
+                  className="absolute left-3 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition hover:bg-white/25"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  aria-label="Next slide"
+                  className="absolute right-3 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition hover:bg-white/25"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Dot indicators */}
+          {slides.length > 1 && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    idx === currentIndex
+                      ? "w-7 bg-cyan-400"
+                      : "w-1.5 bg-white/30 hover:bg-white/60"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

@@ -48,8 +48,8 @@ export async function generateMetadata(): Promise<Metadata> {
     siteUrl = fallbackSiteUrl;
   }
 
-  const siteName = seo?.siteName || "Air Tech Aviation";
-  const defaultTitle = seo?.defaultTitle || "GDS Training & Air Ticketing";
+  const siteName = seo?.siteName || "Md. Akib Hasan";
+  const defaultTitle = seo?.defaultTitle || "Get personalized GDS training from Md. Akib Hasan";
   const defaultDescription = seo?.defaultDescription || "Professional GDS Training and Air Ticketing courses in Bangladesh.";
 
   return {
