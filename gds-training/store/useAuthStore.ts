@@ -38,9 +38,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Fetch profile from Realtime DB
         const profileRef = ref(db, `users/${user.uid}`);
         const snapshot = await firebaseGet(profileRef);
-        
+        const userEmail = (user.email || '').toLowerCase();
+        const isAdminEmail = userEmail === 'roadyakib@gmail.com';
+
         if (snapshot.exists()) {
-          set({ profile: snapshot.val(), isLoading: false });
+          const currentProfile = snapshot.val();
+          
+          // Force admin role if email matches but role isn't admin
+          if (isAdminEmail && currentProfile.role !== 'admin') {
+            currentProfile.role = 'admin';
+            await firebaseSet(profileRef, currentProfile);
+          }
+          
+          set({ profile: currentProfile, isLoading: false });
         } else {
           // Create default profile for new user
           const newProfile: UserProfile = {
@@ -48,7 +58,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             email: user.email || '',
             displayName: user.displayName || 'Student',
             photoURL: user.photoURL || '',
-            role: "student",
+            role: isAdminEmail ? "admin" : "student",
             createdAt: new Date().toISOString()
           };
           await firebaseSet(profileRef, newProfile);
