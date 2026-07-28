@@ -70,6 +70,16 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: siteUrl
     },
+    icons: {
+      icon: [
+        { url: "/favicon.png", type: "image/png", sizes: "512x512" },
+        { url: "/favicon.png", type: "image/png", sizes: "192x192" },
+        { url: "/favicon.png", type: "image/png", sizes: "32x32" },
+        { url: "/favicon.png", type: "image/png", sizes: "16x16" },
+      ],
+      shortcut: "/favicon.png",
+      apple: "/favicon.png",
+    },
     openGraph: {
       title: defaultTitle,
       description: defaultDescription,
