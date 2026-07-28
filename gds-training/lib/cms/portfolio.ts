@@ -26,8 +26,8 @@ export const getPortfolioProjects = async (): Promise<PortfolioProject[]> => {
 
         return Object.entries(data)
             .map(([key, value]) => ({
-                id: key,
-                ...(value as any)
+                ...(value as any),
+                id: key
             }));
     } catch (error) {
         console.error("Error fetching portfolio projects:", error);

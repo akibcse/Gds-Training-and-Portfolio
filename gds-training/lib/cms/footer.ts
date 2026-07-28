@@ -23,8 +23,8 @@ export const getFooterItems = async (): Promise<FooterSection[]> => {
 
         return Object.entries(data)
             .map(([key, value]) => ({
-                id: key,
-                ...(value as any)
+                ...(value as any),
+                id: key
             }))
             .filter((section: any) => section.isActive)
             .sort((a, b) => a.order - b.order);

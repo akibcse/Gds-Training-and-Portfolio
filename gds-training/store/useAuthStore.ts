@@ -50,6 +50,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             await firebaseSet(profileRef, currentProfile);
           }
           
+          // Request legacy admin session cookie for backend API routes
+          if (currentProfile.role === 'admin') {
+            try {
+              const idToken = await user.getIdToken();
+              await fetch("/api/admin/session", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${idToken}`
+                }
+              });
+            } catch (err) {
+              console.error("Failed to set legacy admin session", err);
+            }
+          }
+          
           set({ profile: currentProfile, isLoading: false });
         } else {
           // Create default profile for new user
@@ -62,6 +78,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             createdAt: new Date().toISOString()
           };
           await firebaseSet(profileRef, newProfile);
+          
+          // Request legacy admin session cookie for backend API routes
+          if (newProfile.role === 'admin') {
+            try {
+              const idToken = await user.getIdToken();
+              await fetch("/api/admin/session", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${idToken}`
+                }
+              });
+            } catch (err) {
+              console.error("Failed to set legacy admin session", err);
+            }
+          }
+          
           set({ profile: newProfile, isLoading: false });
         }
       } else {

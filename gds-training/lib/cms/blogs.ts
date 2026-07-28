@@ -29,8 +29,8 @@ export const getBlogs = async (): Promise<Blog[]> => {
 
         return Object.entries(data)
             .map(([key, value]) => ({
-                id: key,
-                ...(value as any)
+                ...(value as any),
+                id: key
             }))
             .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
     } catch (error) {

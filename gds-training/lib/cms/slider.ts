@@ -26,8 +26,8 @@ export const getHeroSlides = async (): Promise<HeroSlide[]> => {
 
     return Object.entries(data)
       .map(([key, value]) => ({
-        id: key,
-        ...(value as any)
+        ...(value as any),
+        id: key
       }))
       .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   } catch (error) {

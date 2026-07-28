@@ -23,8 +23,8 @@ export const getGalleryItems = async (): Promise<GalleryItem[]> => {
     if (!data) return getFallbackGallery();
 
     return Object.entries(data).map(([key, value]) => ({
-      id: key,
-      ...(value as any)
+      ...(value as any),
+      id: key
     }));
   } catch (error) {
     console.error("Error fetching gallery items:", error);

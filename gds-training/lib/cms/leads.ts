@@ -29,8 +29,8 @@ export const getLeads = async (): Promise<Lead[]> => {
 
         return Object.entries(data)
             .map(([key, value]) => ({
-                id: key,
-                ...(value as any)
+                ...(value as any),
+                id: key
             }))
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } catch (error) {

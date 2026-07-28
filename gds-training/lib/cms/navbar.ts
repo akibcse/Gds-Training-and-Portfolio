@@ -23,8 +23,8 @@ export const getNavbar = async (): Promise<NavbarItem[]> => {
 
     return Object.entries(data)
       .map(([key, value]) => ({
-        id: key,
-        ...(value as any)
+        ...(value as any),
+        id: key
       }))
       .sort((a, b) => a.order - b.order);
   } catch (error) {

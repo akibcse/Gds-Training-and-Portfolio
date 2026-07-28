@@ -27,8 +27,8 @@ export const getUsers = async (): Promise<UserProfile[]> => {
     if (!data) return [];
 
     return Object.entries(data).map(([key, value]) => ({
-      id: key,
       ...(value as any),
+      id: key,
       role: (value as any).role || "student"
     }));
   } catch (error) {
