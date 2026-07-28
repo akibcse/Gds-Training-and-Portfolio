@@ -23,6 +23,12 @@ export default async function Navbar() {
     navItems = navItems.filter((item) => item.isActive);
   }
 
+  // Unconditionally remove "Call Now" or "callnow" from navbar links for all users
+  navItems = navItems.filter((link) => 
+    !link.url.toLowerCase().includes("callnow") && 
+    !link.label.toLowerCase().includes("call now")
+  );
+
   return (
     <header className="sticky top-0 z-50 border-b border-aviation-100/70 bg-white/85 backdrop-blur">
       <nav aria-label="Primary" className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">

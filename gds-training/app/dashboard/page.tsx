@@ -125,12 +125,21 @@ export default function StudentDashboard() {
               </div>
             </div>
             
-            <button 
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/10"
-            >
-              <LogOut className="h-4 w-4" /> Sign Out
-            </button>
+            <div className="flex items-center gap-3">
+              <Link 
+                href="/dashboard/settings"
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/10"
+              >
+                Settings
+              </Link>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors border border-white/10"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </div>

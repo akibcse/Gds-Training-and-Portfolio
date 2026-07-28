@@ -42,7 +42,7 @@ export default function UsersManagementPage() {
 
   const handleEditClick = (user: UserProfile) => {
     setEditingUser(user);
-    setFullName(user.fullName || "");
+    setFullName(user.fullName || user.displayName || user.name || "");
     setEmail(user.email || "");
     setPhone(user.phone || "");
     setRole(user.role || "student");
@@ -96,19 +96,26 @@ export default function UsersManagementPage() {
   const columns = [
     {
       header: "User Profile",
-      accessor: (u: UserProfile) => (
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-aviation-100 text-aviation-700 flex items-center justify-center font-bold text-sm">
-            {(u.fullName || u.email || "U").substring(0, 2).toUpperCase()}
+      accessor: (u: UserProfile) => {
+        const displayName = u.fullName || u.displayName || u.name || "Registered User";
+        return (
+          <div className="flex items-center gap-3">
+            {u.photoURL ? (
+              <img src={u.photoURL} alt={displayName} className="h-10 w-10 rounded-full object-cover border border-aviation-100" />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-aviation-100 text-aviation-700 flex items-center justify-center font-bold text-sm">
+                {(displayName).substring(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div>
+              <p className="font-bold text-ink">{displayName}</p>
+              <p className="text-xs text-slate-400 flex items-center gap-1">
+                <Mail className="h-3 w-3" /> {u.email}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="font-bold text-ink">{u.fullName || "Registered User"}</p>
-            <p className="text-xs text-slate-400 flex items-center gap-1">
-              <Mail className="h-3 w-3" /> {u.email}
-            </p>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       header: "Role & Permission",
@@ -132,6 +139,14 @@ export default function UsersManagementPage() {
         <span className="text-xs font-mono text-slate-600 flex items-center gap-1">
           <Phone className="h-3 w-3 text-slate-400" />
           {u.phone || "Not Provided"}
+        </span>
+      )
+    },
+    {
+      header: "Registered",
+      accessor: (u: UserProfile) => (
+        <span className="text-xs text-slate-500">
+          {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : u.updatedAt ? new Date(u.updatedAt).toLocaleDateString() : "Unknown"}
         </span>
       )
     }

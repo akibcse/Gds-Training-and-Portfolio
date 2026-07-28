@@ -5,9 +5,12 @@ export type UserRole = "admin" | "instructor" | "student";
 
 export type UserProfile = {
   id: string;
-  fullName: string;
+  fullName?: string;
+  displayName?: string;
+  name?: string;
   email: string;
   phone?: string;
+  photoURL?: string;
   role: UserRole;
   enrolledCourses?: string[];
   createdAt?: string;
