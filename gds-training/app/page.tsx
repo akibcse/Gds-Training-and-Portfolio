@@ -7,7 +7,7 @@ import LeadForm from "@/components/LeadForm";
 import Reveal from "@/components/Reveal";
 import SEO from "@/components/SEO";
 import StickyEnrollBar from "@/components/StickyEnrollBar";
-import TestimonialCard from "@/components/TestimonialCard";
+import SuccessStories from "@/components/SuccessStories";
 import { getCourses, getPortfolio, getProfile, getSeo, getTestimonials } from "@/lib/getData";
 import { faqSchema, localBusinessSchema, organizationSchema, personSchema, websiteSchema } from "@/lib/structuredData";
 
@@ -127,11 +127,7 @@ export default async function HomePage() {
 
       <Reveal className="mx-auto max-w-6xl px-4 py-10 md:px-6" delay={0.12}>
         <h2 className="text-3xl font-semibold text-ink">Student Success Stories</h2>
-        <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((testimonial) => (
-            <TestimonialCard key={testimonial.name} testimonial={testimonial} />
-          ))}
-        </div>
+        <SuccessStories staticTestimonials={testimonials} />
       </Reveal>
 
       {/* Dynamic Image Gallery Showcase */}

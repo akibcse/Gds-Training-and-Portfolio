@@ -3,6 +3,7 @@ import { getProfile } from "@/lib/getData";
 import { getNavbar } from "@/lib/cms/navbar";
 import MobileMenu from "@/components/MobileMenu";
 import AuthButtons from "./AuthButtons";
+import CertSearchBar from "./CertSearchBar";
 
 const DEFAULT_NAVBAR = [
   { id: "1", label: "Home", url: "/", order: 1, isActive: true },
@@ -49,6 +50,7 @@ export default async function Navbar() {
           <Link href="/courses" className="font-bold text-aviation-600 transition hover:text-aviation-700">
             Buy Courses
           </Link>
+          <CertSearchBar />
           <a
             href="/#lead-form"
             className="rounded-full bg-gradient-to-r from-cta-500 to-cta-600 px-4 py-2 text-white shadow-soft transition hover:brightness-105"

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
-import { ref, onValue, update } from "firebase/database";
+import { ref, onValue, update, push } from "firebase/database";
 import { db } from "@/lib/firebase";
 import { 
     CheckCircle, 
@@ -94,6 +94,20 @@ export default function AdminPaymentsPage() {
         enrolledAt: new Date().toISOString()
       };
 
+      // Notify Student
+      if (sub.studentId) {
+        const notifKey = push(ref(db, `student_notifications/${sub.studentId}`)).key;
+        updates[`student_notifications/${sub.studentId}/${notifKey}`] = {
+          id: notifKey,
+          studentId: sub.studentId,
+          type: "payment_approved",
+          message: `Your payment of ৳${sub.amount} for "${sub.courseName}" has been approved! Access granted.`,
+          link: "/dashboard",
+          read: false,
+          createdAt: new Date().toISOString()
+        };
+      }
+
       await update(ref(db), updates);
     } catch (err: any) {
       alert("Failed to approve enrollment: " + err.message);
@@ -109,6 +123,20 @@ export default function AdminPaymentsPage() {
       updates[`payment_submissions/${sub.id}/status`] = "Rejected";
       updates[`payment_submissions/${sub.id}/rejectionReason`] = reason;
       updates[`payment_submissions/${sub.id}/rejectedBy`] = profile?.email || user?.email || "Admin";
+
+      // Notify Student
+      if (sub.studentId) {
+        const notifKey = push(ref(db, `student_notifications/${sub.studentId}`)).key;
+        updates[`student_notifications/${sub.studentId}/${notifKey}`] = {
+          id: notifKey,
+          studentId: sub.studentId,
+          type: "payment_rejected",
+          message: `Your payment for "${sub.courseName}" was rejected. Reason: ${reason}`,
+          link: "/dashboard",
+          read: false,
+          createdAt: new Date().toISOString()
+        };
+      }
 
       await update(ref(db), updates);
     } catch (err: any) {

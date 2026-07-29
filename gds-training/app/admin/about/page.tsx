@@ -1,120 +1,28 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { AnimatePresence, motion } from "framer-motion";
-import type { ProfileRecord, PortfolioProfileRecord } from "@/lib/admin-data";
+import type { PortfolioProfileRecord } from "@/lib/admin-data";
 import { getFirebaseAuth } from "@/lib/firebase";
+import {
+    User,
+    Save,
+    Loader2,
+    CheckCircle2,
+    AlertCircle,
+    Plus,
+    Trash2,
+    Briefcase,
+    GraduationCap,
+    Award,
+    Sparkles,
+    Image as ImageIcon
+} from "lucide-react";
 
-type Toast = { id: string; type: "success" | "error"; message: string };
-
-function ToastContainer({ toasts, remove }: { toasts: Toast[]; remove: (id: string) => void }) {
-    return (
-        <div className="fixed right-4 top-4 z-50 flex flex-col gap-2">
-            <AnimatePresence>
-                {toasts.map((toast) => (
-                    <motion.div
-                        key={toast.id}
-                        initial={{ opacity: 0, x: 50, scale: 0.9 }}
-                        animate={{ opacity: 1, x: 0, scale: 1 }}
-                        exit={{ opacity: 0, x: 50, scale: 0.9 }}
-                        className={`min-w-[280px] rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${toast.type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
-                            }`}
-                    >
-                        <div className="flex items-center justify-between gap-3">
-                            <span>{toast.message}</span>
-                            <button onClick={() => remove(toast.id)} className="text-white/80 hover:text-white">
-                                ✕
-                            </button>
-                        </div>
-                    </motion.div>
-                ))}
-            </AnimatePresence>
-        </div>
-    );
-}
-
-function ListSection({ label, items, onChange, renderItem, onAdd }: any) {
-    const handleDragEnd = (result: DropResult) => {
-        if (!result.destination) return;
-        const newItems = Array.from(items || []);
-        const [removed] = newItems.splice(result.source.index, 1);
-        newItems.splice(result.destination.index, 0, removed);
-        onChange(newItems);
-    };
-
-    const removeItem = (index: number) => onChange((items || []).filter((_: any, i: number) => i !== index));
-
-    return (
-        <div className="space-y-4 rounded-xl border border-aviation-100 p-4">
-            <div className="flex items-center justify-between">
-                <h4 className="text-sm font-bold text-ink">{label}</h4>
-                <button
-                    type="button"
-                    onClick={onAdd}
-                    className="rounded-lg border border-aviation-200 px-3 py-1.5 text-xs font-semibold text-aviation-700 hover:bg-aviation-50"
-                >
-                    + Add
-                </button>
-            </div>
-            {(items || []).length === 0 && <p className="text-xs text-ink/50">No items added yet.</p>}
-            <DragDropContext onDragEnd={handleDragEnd}>
-                <Droppable droppableId={`about-${label}`}>
-                    {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-                            {(items || []).map((item: any, index: number) => (
-                                <Draggable key={`${label}-${index}`} draggableId={`${label}-${index}`} index={index}>
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            className={`relative rounded-xl border bg-white p-4 ${snapshot.isDragging ? "border-aviation-500 shadow-xl" : "border-aviation-100 shadow-sm"
-                                                }`}
-                                        >
-                                            <div {...provided.dragHandleProps} className="absolute left-1 top-1/2 -translate-y-1/2 cursor-grab py-2 text-ink/20">
-                                                ⋮⋮
-                                            </div>
-                                            <div className="ml-4 space-y-3">
-                                                {renderItem(item, index)}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeItem(index)}
-                                                    className="text-xs font-semibold text-red-500 hover:text-red-700"
-                                                >
-                                                    Remove This Item
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
-        </div>
-    );
-}
-
-export default function AboutPage() {
-    const [profile, setProfile] = useState<ProfileRecord | null>(null);
-    const [portfolioProfile, setPortfolioProfile] = useState<PortfolioProfileRecord | null>(null);
+export default function AboutMdAkibHasanPage() {
+    const [portfolio, setPortfolio] = useState<PortfolioProfileRecord | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [toasts, setToasts] = useState<Toast[]>([]);
-
-    const addToast = useCallback((type: "success" | "error", message: string) => {
-        const id = crypto.randomUUID();
-        setToasts((prev) => [...prev, { id, type, message }]);
-        setTimeout(() => {
-            setToasts((prev) => prev.filter((t) => t.id !== id));
-        }, 3500);
-    }, []);
-
-    const removeToast = useCallback((id: string) => {
-        setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, []);
+    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
     const getAuthHeader = async (): Promise<Record<string, string>> => {
         const auth = getFirebaseAuth();
@@ -126,248 +34,581 @@ export default function AboutPage() {
         return {};
     };
 
-    const fetchData = useCallback(async () => {
+    const fetchAboutData = useCallback(async () => {
         try {
             const headers = await getAuthHeader();
             const response = await fetch("/api/admin/about", { headers });
             if (response.ok) {
                 const data = await response.json();
-                setProfile(data.profile);
-                setPortfolioProfile(data.portfolioProfile);
+                setPortfolio(data.portfolioProfile);
             }
-        } catch (error) {
-            addToast("error", "Failed to fetch about data");
+        } catch {
+            setMessage({ type: "error", text: "Failed to fetch about profile data" });
         } finally {
             setLoading(false);
         }
-    }, [addToast]);
+    }, []);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        fetchAboutData();
+    }, [fetchAboutData]);
 
-    const saveAll = async () => {
-        if (!profile || !portfolioProfile) return;
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!portfolio) return;
         setSaving(true);
+        setMessage(null);
+
         try {
             const headers = { "Content-Type": "application/json", ...(await getAuthHeader()) };
+            // Get public profile to preserve it
+            const getRes = await fetch("/api/admin/about", { headers });
+            const currentData = await getRes.json();
+
             const response = await fetch("/api/admin/about", {
                 method: "PUT",
                 headers,
-                body: JSON.stringify({ profile, portfolioProfile })
+                body: JSON.stringify({
+                    profile: currentData.profile,
+                    portfolioProfile: portfolio
+                })
             });
 
             if (response.ok) {
-                addToast("success", "Profile updated successfully");
+                setMessage({ type: "success", text: "About profile saved successfully!" });
             } else {
-                addToast("error", "Failed to save profile");
+                setMessage({ type: "error", text: "Failed to save profile changes." });
             }
         } catch {
-            addToast("error", "Network error occurred");
+            setMessage({ type: "error", text: "Network error occurred while saving." });
         } finally {
             setSaving(false);
         }
     };
 
-    if (loading || !profile || !portfolioProfile) {
-        return <div className="p-8 text-center text-sm text-ink/70">Loading profile data...</div>;
+    if (loading || !portfolio) {
+        return (
+            <div className="flex h-64 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-aviation-600" />
+            </div>
+        );
     }
 
     return (
-        <div className="mx-auto max-w-6xl space-y-8 p-6">
-            <ToastContainer toasts={toasts} remove={removeToast} />
-
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-ink">About & Profile</h2>
-                <button
-                    onClick={saveAll}
-                    disabled={saving}
-                    className="rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-8 py-3 text-sm font-bold text-white shadow-lg disabled:opacity-50"
-                >
-                    {saving ? "Saving Changes..." : "Save All Changes"}
-                </button>
+        <div className="mx-auto max-w-5xl space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-ink tracking-tight flex items-center gap-3">
+                        <User className="h-8 w-8 text-aviation-600" />
+                        About
+                    </h1>
+                    <p className="mt-1 text-ink/50 text-sm">
+                        Manage detailed instructor profile, career summary, experience, education, qualifications, and skills.
+                    </p>
+                </div>
             </div>
 
-            <div className="grid gap-8 lg:grid-cols-2">
-                <section className="space-y-6">
-                    <article className="space-y-4 rounded-2xl border border-aviation-100 bg-white p-6 shadow-soft">
-                        <h3 className="text-lg font-semibold border-b pb-2">Public Profile</h3>
-                        <div className="grid gap-4">
-                            <div>
-                                <label className="text-xs font-bold uppercase text-ink/50">Full Name</label>
-                                <input
-                                    className="w-full rounded-lg border border-aviation-100 bg-aviation-50/30 px-3 py-2 text-sm"
-                                    value={profile.name}
-                                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase text-ink/50">Tagline</label>
-                                <input
-                                    className="w-full rounded-lg border border-aviation-100 bg-aviation-50/30 px-3 py-2 text-sm"
-                                    value={profile.tagline}
-                                    onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase text-ink/50">Biography / Description</label>
-                                <textarea
-                                    rows={4}
-                                    className="w-full rounded-lg border border-aviation-100 bg-aviation-50/30 px-3 py-2 text-sm"
-                                    value={profile.description}
-                                    onChange={(e) => setProfile({ ...profile, description: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold uppercase text-ink/50">Hero Image URL</label>
-                                <input
-                                    className="w-full rounded-lg border border-aviation-100 bg-aviation-50/30 px-3 py-2 text-sm"
-                                    placeholder="https://example.com/hero-image.jpg"
-                                    value={portfolioProfile.profileImage}
-                                    onChange={(e) => setPortfolioProfile({ ...portfolioProfile, profileImage: e.target.value })}
-                                />
-                                <p className="mt-1 text-xs text-ink/50">Used in homepage hero and about profile image.</p>
-                            </div>
-                        </div>
-                    </article>
+            {message && (
+                <div
+                    className={`flex items-center gap-3 p-4 rounded-xl text-sm font-semibold border ${
+                        message.type === "success"
+                            ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                            : "bg-rose-50 text-rose-800 border-rose-200"
+                    }`}
+                >
+                    {message.type === "success" ? (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                    ) : (
+                        <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
+                    )}
+                    {message.text}
+                </div>
+            )}
 
-                    <article className="space-y-4 rounded-2xl border border-aviation-100 bg-white p-6 shadow-soft">
-                        <h3 className="text-lg font-semibold border-b pb-2">Portfolio Details</h3>
-                        <div className="grid gap-4">
-                            <div>
-                                <label className="text-xs font-bold uppercase text-ink/50">Career Objective</label>
-                                <textarea
-                                    rows={3}
-                                    className="w-full rounded-lg border border-aviation-100 bg-aviation-50/30 px-3 py-2 text-sm"
-                                    value={portfolioProfile.careerObjective}
-                                    onChange={(e) => setPortfolioProfile({ ...portfolioProfile, careerObjective: e.target.value })}
-                                />
-                            </div>
-                            <ListSection
-                                label="Professional Experience"
-                                items={portfolioProfile.experience}
-                                onAdd={() => setPortfolioProfile({
-                                    ...portfolioProfile,
-                                    experience: [...portfolioProfile.experience, { title: "", organization: "", location: "", duration: "", years: "", highlights: [] }]
-                                })}
-                                onChange={(items: any) => setPortfolioProfile({ ...portfolioProfile, experience: items })}
-                                renderItem={(item: any, index: number) => (
-                                    <div className="grid gap-3">
-                                        <input
-                                            placeholder="Title / Role"
-                                            className="w-full rounded border border-aviation-100 px-3 py-2 text-sm"
-                                            value={item.title}
-                                            onChange={(e) => {
-                                                const next = [...portfolioProfile.experience];
-                                                next[index].title = e.target.value;
-                                                setPortfolioProfile({ ...portfolioProfile, experience: next });
-                                            }}
-                                        />
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <input
-                                                placeholder="Organization"
-                                                className="rounded border border-aviation-100 px-3 py-2 text-sm"
-                                                value={item.organization}
-                                                onChange={(e) => {
-                                                    const next = [...portfolioProfile.experience];
-                                                    next[index].organization = e.target.value;
-                                                    setPortfolioProfile({ ...portfolioProfile, experience: next });
-                                                }}
-                                            />
-                                            <input
-                                                placeholder="Duration (e.g. 2020 - Present)"
-                                                className="rounded border border-aviation-100 px-3 py-2 text-sm"
-                                                value={item.duration}
-                                                onChange={(e) => {
-                                                    const next = [...portfolioProfile.experience];
-                                                    next[index].duration = e.target.value;
-                                                    setPortfolioProfile({ ...portfolioProfile, experience: next });
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
+            <form onSubmit={handleSave} className="space-y-6">
+                {/* 1. Basic Bio & Contact */}
+                <div className="bg-white rounded-2xl border border-aviation-100 p-6 shadow-soft space-y-5">
+                    <h2 className="text-lg font-bold text-ink border-b border-aviation-100 pb-3 flex items-center gap-2">
+                        <User className="h-5 w-5 text-aviation-600" /> Basic Bio & Details
+                    </h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-ink/60 uppercase mb-1.5">Full Name</label>
+                            <input
+                                type="text"
+                                value={portfolio.fullName}
+                                onChange={(e) => setPortfolio({ ...portfolio, fullName: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                                required
                             />
                         </div>
-                    </article>
-                </section>
+                        <div>
+                            <label className="block text-xs font-bold text-ink/60 uppercase mb-1.5">Location</label>
+                            <input
+                                type="text"
+                                value={portfolio.location}
+                                onChange={(e) => setPortfolio({ ...portfolio, location: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                            />
+                        </div>
+                    </div>
 
-                <section className="space-y-6">
-                    <article className="space-y-4 rounded-2xl border border-aviation-100 bg-white p-6 shadow-soft">
-                        <h3 className="text-lg font-semibold border-b pb-2">Education & Skills</h3>
-                        <ListSection
-                            label="Academic Background"
-                            items={portfolioProfile.education}
-                            onAdd={() => setPortfolioProfile({
-                                ...portfolioProfile,
-                                education: [...portfolioProfile.education, { exam: "", institute: "", result: "", year: "" }]
-                            })}
-                            onChange={(items: any) => setPortfolioProfile({ ...portfolioProfile, education: items })}
-                            renderItem={(item: any, index: number) => (
-                                <div className="grid gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-ink/60 uppercase mb-1.5">Phone Number</label>
+                            <input
+                                type="text"
+                                value={portfolio.phones[0] || ""}
+                                onChange={(e) => setPortfolio({ ...portfolio, phones: [e.target.value] })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-ink/60 uppercase mb-1.5">Email Address</label>
+                            <input
+                                type="email"
+                                value={portfolio.email}
+                                onChange={(e) => setPortfolio({ ...portfolio, email: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-ink/60 uppercase mb-1.5">Profile Image URL</label>
+                        <div className="flex gap-3 items-center">
+                            <input
+                                type="text"
+                                value={portfolio.profileImage}
+                                onChange={(e) => setPortfolio({ ...portfolio, profileImage: e.target.value })}
+                                className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                            />
+                            {portfolio.profileImage && (
+                                <img
+                                    src={portfolio.profileImage}
+                                    alt="Preview"
+                                    className="h-10 w-10 rounded-full object-cover border border-aviation-200 shrink-0"
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-ink/60 uppercase mb-1.5">About Md Akib Hasan (Biography)</label>
+                        <textarea
+                            rows={3}
+                            value={portfolio.careerObjective}
+                            onChange={(e) => setPortfolio({ ...portfolio, careerObjective: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                            placeholder="Certified GDS Instructor and aviation professional..."
+                        />
+                    </div>
+                </div>
+
+                {/* 2. Special Qualification */}
+                <div className="bg-white rounded-2xl border border-aviation-100 p-6 shadow-soft space-y-5">
+                    <h2 className="text-lg font-bold text-ink border-b border-aviation-100 pb-3 flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-amber-500" /> Special Qualification
+                    </h2>
+
+                    <div>
+                        <textarea
+                            rows={3}
+                            value={portfolio.specialQualification}
+                            onChange={(e) => setPortfolio({ ...portfolio, specialQualification: e.target.value })}
+                            className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                            placeholder="Certified GDS instructor with hands-on experience in airline reservation systems..."
+                        />
+                    </div>
+                </div>
+
+                {/* 3. Career Summary Points */}
+                <div className="bg-white rounded-2xl border border-aviation-100 p-6 shadow-soft space-y-5">
+                    <div className="flex items-center justify-between border-b border-aviation-100 pb-3">
+                        <h2 className="text-lg font-bold text-ink flex items-center gap-2">
+                            <Briefcase className="h-5 w-5 text-aviation-600" /> Career Summary ({portfolio.careerSummary.length} points)
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={() => setPortfolio({ ...portfolio, careerSummary: [...portfolio.careerSummary, ""] })}
+                            className="flex items-center gap-1 text-xs font-bold text-aviation-700 bg-aviation-50 hover:bg-aviation-100 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                            <Plus className="h-3.5 w-3.5" /> Add Point
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {portfolio.careerSummary.map((point, index) => (
+                            <div key={index} className="flex gap-2 items-center">
+                                <input
+                                    type="text"
+                                    value={point}
+                                    onChange={(e) => {
+                                        const next = [...portfolio.careerSummary];
+                                        next[index] = e.target.value;
+                                        setPortfolio({ ...portfolio, careerSummary: next });
+                                    }}
+                                    placeholder={`Career summary point ${index + 1}`}
+                                    className="w-full px-4 py-2 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = portfolio.careerSummary.filter((_, i) => i !== index);
+                                        setPortfolio({ ...portfolio, careerSummary: next });
+                                    }}
+                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 4. Professional Experience */}
+                <div className="bg-white rounded-2xl border border-aviation-100 p-6 shadow-soft space-y-5">
+                    <div className="flex items-center justify-between border-b border-aviation-100 pb-3">
+                        <h2 className="text-lg font-bold text-ink flex items-center gap-2">
+                            <Briefcase className="h-5 w-5 text-emerald-600" /> Experience ({portfolio.experience.length} roles)
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setPortfolio({
+                                    ...portfolio,
+                                    experience: [
+                                        ...portfolio.experience,
+                                        { title: "", organization: "", location: "Dhaka", duration: "", years: "", highlights: [""] }
+                                    ]
+                                })
+                            }
+                            className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                            <Plus className="h-3.5 w-3.5" /> Add Experience Role
+                        </button>
+                    </div>
+
+                    <div className="space-y-6">
+                        {portfolio.experience.map((job, jIndex) => (
+                            <div key={jIndex} className="p-4 rounded-xl border border-aviation-100 bg-slate-50/50 space-y-3 relative">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = portfolio.experience.filter((_, i) => i !== jIndex);
+                                        setPortfolio({ ...portfolio, experience: next });
+                                    }}
+                                    className="absolute top-4 right-4 text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" /> Remove Role
+                                </button>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-24">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-ink/60 mb-1">Title / Role</label>
+                                        <input
+                                            type="text"
+                                            value={job.title}
+                                            onChange={(e) => {
+                                                const next = [...portfolio.experience];
+                                                next[jIndex].title = e.target.value;
+                                                setPortfolio({ ...portfolio, experience: next });
+                                            }}
+                                            placeholder="e.g. Executive Admin, Instructor"
+                                            className="w-full px-3.5 py-2 rounded-lg border border-aviation-200 text-sm bg-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-ink/60 mb-1">Organization / Company</label>
+                                        <input
+                                            type="text"
+                                            value={job.organization}
+                                            onChange={(e) => {
+                                                const next = [...portfolio.experience];
+                                                next[jIndex].organization = e.target.value;
+                                                setPortfolio({ ...portfolio, experience: next });
+                                            }}
+                                            placeholder="e.g. ATTI - ATAB"
+                                            className="w-full px-3.5 py-2 rounded-lg border border-aviation-200 text-sm bg-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-ink/60 mb-1">Location</label>
+                                        <input
+                                            type="text"
+                                            value={job.location}
+                                            onChange={(e) => {
+                                                const next = [...portfolio.experience];
+                                                next[jIndex].location = e.target.value;
+                                                setPortfolio({ ...portfolio, experience: next });
+                                            }}
+                                            placeholder="e.g. Dhaka"
+                                            className="w-full px-3.5 py-2 rounded-lg border border-aviation-200 text-sm bg-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold text-ink/60 mb-1">Duration / Years</label>
+                                        <input
+                                            type="text"
+                                            value={job.duration}
+                                            onChange={(e) => {
+                                                const next = [...portfolio.experience];
+                                                next[jIndex].duration = e.target.value;
+                                                next[jIndex].years = e.target.value;
+                                                setPortfolio({ ...portfolio, experience: next });
+                                            }}
+                                            placeholder="e.g. 3.3 Years"
+                                            className="w-full px-3.5 py-2 rounded-lg border border-aviation-200 text-sm bg-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Role Highlights */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                        <label className="text-xs font-bold text-ink/70">Job Responsibilities & Highlights</label>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const next = [...portfolio.experience];
+                                                next[jIndex].highlights = [...(next[jIndex].highlights || []), ""];
+                                                setPortfolio({ ...portfolio, experience: next });
+                                            }}
+                                            className="text-[11px] font-bold text-aviation-600 hover:underline"
+                                        >
+                                            + Add Highlight
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {(job.highlights || []).map((hl, hIndex) => (
+                                            <div key={hIndex} className="flex gap-2 items-center">
+                                                <input
+                                                    type="text"
+                                                    value={hl}
+                                                    onChange={(e) => {
+                                                        const next = [...portfolio.experience];
+                                                        next[jIndex].highlights[hIndex] = e.target.value;
+                                                        setPortfolio({ ...portfolio, experience: next });
+                                                    }}
+                                                    placeholder={`Highlight ${hIndex + 1}`}
+                                                    className="w-full px-3 py-1.5 rounded-lg border border-aviation-200 text-xs bg-white"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const next = [...portfolio.experience];
+                                                        next[jIndex].highlights = next[jIndex].highlights.filter((_, i) => i !== hIndex);
+                                                        setPortfolio({ ...portfolio, experience: next });
+                                                    }}
+                                                    className="p-1 text-rose-500 hover:bg-rose-50 rounded shrink-0"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 5. Education */}
+                <div className="bg-white rounded-2xl border border-aviation-100 p-6 shadow-soft space-y-5">
+                    <div className="flex items-center justify-between border-b border-aviation-100 pb-3">
+                        <h2 className="text-lg font-bold text-ink flex items-center gap-2">
+                            <GraduationCap className="h-5 w-5 text-indigo-600" /> Education ({portfolio.education.length} degrees)
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setPortfolio({
+                                    ...portfolio,
+                                    education: [...portfolio.education, { exam: "", institute: "", result: "", year: "" }]
+                                })
+                            }
+                            className="flex items-center gap-1 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                            <Plus className="h-3.5 w-3.5" /> Add Degree
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {portfolio.education.map((edu, eIndex) => (
+                            <div key={eIndex} className="p-4 rounded-xl border border-aviation-100 bg-slate-50/50 space-y-2 relative">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = portfolio.education.filter((_, i) => i !== eIndex);
+                                        setPortfolio({ ...portfolio, education: next });
+                                    }}
+                                    className="absolute top-2 right-2 text-rose-500 hover:bg-rose-50 p-1 rounded"
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+
+                                <div>
+                                    <label className="block text-[11px] font-semibold text-ink/60 mb-0.5">Exam / Degree</label>
                                     <input
-                                        placeholder="Degree / Exam"
-                                        className="w-full rounded border border-aviation-100 px-3 py-2 text-sm"
-                                        value={item.exam}
+                                        type="text"
+                                        value={edu.exam}
                                         onChange={(e) => {
-                                            const next = [...portfolioProfile.education];
-                                            next[index].exam = e.target.value;
-                                            setPortfolioProfile({ ...portfolioProfile, education: next });
+                                            const next = [...portfolio.education];
+                                            next[eIndex].exam = e.target.value;
+                                            setPortfolio({ ...portfolio, education: next });
                                         }}
-                                    />
-                                    <input
-                                        placeholder="Institute"
-                                        className="w-full rounded border border-aviation-100 px-3 py-2 text-sm"
-                                        value={item.institute}
-                                        onChange={(e) => {
-                                            const next = [...portfolioProfile.education];
-                                            next[index].institute = e.target.value;
-                                            setPortfolioProfile({ ...portfolioProfile, education: next });
-                                        }}
+                                        placeholder="e.g. BSc, HSC, SSC"
+                                        className="w-full px-3 py-1.5 rounded-lg border border-aviation-200 text-xs bg-white"
                                     />
                                 </div>
-                            )}
-                        />
 
-                        <ListSection
-                            label="Languages"
-                            items={portfolioProfile.languages}
-                            onAdd={() => setPortfolioProfile({
-                                ...portfolioProfile,
-                                languages: [...portfolioProfile.languages, { name: "", reading: "High", writing: "High", speaking: "High" }]
-                            })}
-                            onChange={(items: any) => setPortfolioProfile({ ...portfolioProfile, languages: items })}
-                            renderItem={(item: any, index: number) => (
-                                <div className="flex items-center gap-3">
+                                <div>
+                                    <label className="block text-[11px] font-semibold text-ink/60 mb-0.5">Institute</label>
                                     <input
-                                        placeholder="Language Name"
-                                        className="w-1/3 rounded border border-aviation-100 px-3 py-2 text-sm"
-                                        value={item.name}
+                                        type="text"
+                                        value={edu.institute}
                                         onChange={(e) => {
-                                            const next = [...portfolioProfile.languages];
-                                            next[index].name = e.target.value;
-                                            setPortfolioProfile({ ...portfolioProfile, languages: next });
+                                            const next = [...portfolio.education];
+                                            next[eIndex].institute = e.target.value;
+                                            setPortfolio({ ...portfolio, education: next });
                                         }}
+                                        placeholder="e.g. Eastern University"
+                                        className="w-full px-3 py-1.5 rounded-lg border border-aviation-200 text-xs bg-white"
                                     />
-                                    <select
-                                        className="w-2/3 rounded border border-aviation-100 px-3 py-2 text-sm"
-                                        value={item.speaking}
-                                        onChange={(e) => {
-                                            const next = [...portfolioProfile.languages];
-                                            next[index].speaking = e.target.value;
-                                            setPortfolioProfile({ ...portfolioProfile, languages: next });
-                                        }}
-                                    >
-                                        <option value="High">High Proficiency</option>
-                                        <option value="Medium">Medium Proficiency</option>
-                                        <option value="Low">Low Proficiency</option>
-                                    </select>
                                 </div>
-                            )}
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label className="block text-[10px] font-semibold text-ink/60 mb-0.5">Result</label>
+                                        <input
+                                            type="text"
+                                            value={edu.result}
+                                            onChange={(e) => {
+                                                const next = [...portfolio.education];
+                                                next[eIndex].result = e.target.value;
+                                                setPortfolio({ ...portfolio, education: next });
+                                            }}
+                                            placeholder="Optional"
+                                            className="w-full px-2.5 py-1 rounded-lg border border-aviation-200 text-xs bg-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-semibold text-ink/60 mb-0.5">Year</label>
+                                        <input
+                                            type="text"
+                                            value={edu.year}
+                                            onChange={(e) => {
+                                                const next = [...portfolio.education];
+                                                next[eIndex].year = e.target.value;
+                                                setPortfolio({ ...portfolio, education: next });
+                                            }}
+                                            placeholder="Optional"
+                                            className="w-full px-2.5 py-1 rounded-lg border border-aviation-200 text-xs bg-white"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 6. Training & Professional Qualifications */}
+                <div className="bg-white rounded-2xl border border-aviation-100 p-6 shadow-soft space-y-5">
+                    <div className="flex items-center justify-between border-b border-aviation-100 pb-3">
+                        <h2 className="text-lg font-bold text-ink flex items-center gap-2">
+                            <Award className="h-5 w-5 text-amber-600" /> Training & Professional Qualifications ({portfolio.trainings.length})
+                        </h2>
+                        <button
+                            type="button"
+                            onClick={() => setPortfolio({ ...portfolio, trainings: [...portfolio.trainings, ""] })}
+                            className="flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                            <Plus className="h-3.5 w-3.5" /> Add Training
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {portfolio.trainings.map((tr, tIndex) => (
+                            <div key={tIndex} className="flex gap-2 items-center">
+                                <input
+                                    type="text"
+                                    value={tr}
+                                    onChange={(e) => {
+                                        const next = [...portfolio.trainings];
+                                        next[tIndex] = e.target.value;
+                                        setPortfolio({ ...portfolio, trainings: next });
+                                    }}
+                                    placeholder={`Training program ${tIndex + 1}`}
+                                    className="w-full px-4 py-2 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const next = portfolio.trainings.filter((_, i) => i !== tIndex);
+                                        setPortfolio({ ...portfolio, trainings: next });
+                                    }}
+                                    className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors shrink-0"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 7. Skills */}
+                <div className="bg-white rounded-2xl border border-aviation-100 p-6 shadow-soft space-y-5">
+                    <div className="flex items-center justify-between border-b border-aviation-100 pb-3">
+                        <h2 className="text-lg font-bold text-ink flex items-center gap-2">
+                            <Sparkles className="h-5 w-5 text-cyan-600" /> Skills ({portfolio.skills.length})
+                        </h2>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-ink/60 uppercase mb-1.5">
+                            Skills List (Comma Separated)
+                        </label>
+                        <input
+                            type="text"
+                            value={portfolio.skills.join(", ")}
+                            onChange={(e) => {
+                                const list = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                                setPortfolio({ ...portfolio, skills: list });
+                            }}
+                            placeholder="Air Ticketing, Sabre, Galileo, GDS Training, PNR Creation..."
+                            className="w-full px-4 py-2.5 rounded-xl border border-aviation-200 text-sm outline-none focus:border-aviation-600 bg-white"
                         />
-                    </article>
-                </section>
-            </div>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {portfolio.skills.map((sk, index) => (
+                                <span key={index} className="inline-flex items-center gap-1 rounded-full bg-aviation-100 text-aviation-800 text-xs font-bold px-3 py-1">
+                                    {sk}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="flex items-center gap-2 bg-aviation-600 hover:bg-aviation-700 text-white font-bold px-8 py-3 rounded-2xl shadow-lg transition-all disabled:opacity-50 active:scale-95"
+                    >
+                        {saving ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin" /> Saving Changes...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="h-4 w-4" /> Save About Details
+                            </>
+                        )}
+                    </button>
+                </div>
+            </form>
         </div>
     );
 }

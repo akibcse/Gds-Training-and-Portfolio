@@ -1,36 +1,6 @@
 {
     "rules": {
-        ".read": "false",
-        ".write": "false",
-        "cms": {
-            "navbar": {
-                ".read": "true",
-                ".write": "false"
-            },
-            "footer": {
-                ".read": "true",
-                ".write": "false"
-            },
-            "seo": {
-                ".read": "true",
-                ".write": "false"
-            },
-            "courses": {
-                ".read": "true",
-                ".write": "false"
-            },
-            "blogs": {
-                ".read": "true",
-                ".write": "false"
-            },
-            "portfolio": {
-                ".read": "true",
-                ".write": "false"
-            },
-            "leads": {
-                ".read": "false",
-                ".write": "true"
-            }
-        }
+        ".read": "true",
+        ".write": "true"
     }
 }

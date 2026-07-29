@@ -65,7 +65,7 @@ export default function Hero({
 
       {/* ── Part 1: Instructor hero content ── */}
 
-      <div className="hero-gradient animate-gradientShift relative z-10 mx-auto grid max-w-6xl gap-8 px-5 pb-10 pt-14 text-white md:grid-cols-2 md:px-10">
+      <div className="hero-gradient animate-gradientShift relative z-10 mx-4 md:mx-6 grid max-w-6xl gap-8 px-5 pb-10 pt-14 text-white md:grid-cols-2 md:px-10 rounded-3xl xl:mx-auto">
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={reduce ? undefined : { opacity: 1, y: 0 }}

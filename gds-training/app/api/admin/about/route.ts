@@ -38,7 +38,8 @@ const normalizeProfile = (input: ProfileRecord): ProfileRecord => ({
   },
   experienceYears: Number(input?.experienceYears) || 0,
   studentsTrained: Number(input?.studentsTrained) || 0,
-  jobPlacementSupport: Boolean(input?.jobPlacementSupport)
+  jobPlacementSupport: Boolean(input?.jobPlacementSupport),
+  instituteName: input?.instituteName?.trim() || "GDS Training & Aviation Academy"
 });
 
 const normalizePortfolioProfile = (input: PortfolioProfileRecord): PortfolioProfileRecord => ({

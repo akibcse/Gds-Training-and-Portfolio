@@ -69,7 +69,7 @@ export default async function AboutPage() {
           />
         </div>
         <div>
-          <h1 className="font-[var(--font-serif)] text-4xl text-ink">About {portfolioData.fullName}</h1>
+          <h1 className="font-[var(--font-serif)] text-4xl text-ink">{portfolioData.fullName}</h1>
           <p className="mt-4 text-base text-ink/80">
             {portfolioData.careerObjective}
           </p>

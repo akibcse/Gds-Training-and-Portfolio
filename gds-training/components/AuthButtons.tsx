@@ -6,6 +6,7 @@ import { LogOut, LayoutDashboard, User } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useState, useEffect } from "react";
+import StudentNotificationBell from "./StudentNotificationBell";
 
 export default function AuthButtons() {
   const { user, profile, isLoading } = useAuthStore();
@@ -25,9 +26,10 @@ export default function AuthButtons() {
 
   if (user && profile) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
+        <StudentNotificationBell />
         {profile.role === "admin" && (
-          <Link href="/admin/payments" className="hidden md:flex text-xs font-bold text-slate-500 hover:text-[#1D4ED8] transition-colors items-center gap-1">
+          <Link href="/admin/dashboard" className="hidden md:flex text-xs font-bold text-slate-500 hover:text-[#1D4ED8] transition-colors items-center gap-1">
             <LayoutDashboard className="h-4 w-4" /> Admin
           </Link>
         )}

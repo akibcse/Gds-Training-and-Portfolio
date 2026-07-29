@@ -24,6 +24,7 @@ export type Profile = {
   experienceYears: number;
   studentsTrained: number;
   jobPlacementSupport: boolean;
+  instituteName?: string;
 };
 
 import type { Course, CourseModule, ModuleLesson, CourseFaq } from "./cms/courses";

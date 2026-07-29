@@ -1,6 +1,8 @@
 "use client";
 
 import { type FormEvent, useState, useEffect } from "react";
+import { ref, push, set } from "firebase/database";
+import { db } from "@/lib/firebase";
 
 type FormState = {
   name: string;
@@ -71,6 +73,21 @@ export default function LeadForm() {
         throw new Error("Failed to submit");
       }
 
+      // Create Realtime Admin Notification
+      try {
+        const notifRef = push(ref(db, "notifications"));
+        await set(notifRef, {
+          id: notifRef.key,
+          type: "new_lead",
+          message: `New demo booking from ${form.name} (${form.phone}) for ${form.course}`,
+          link: "/admin/leads",
+          read: false,
+          createdAt: new Date().toISOString()
+        });
+      } catch (notifErr) {
+        console.warn("Could not push admin notification:", notifErr);
+      }
+
       setSuccess(
         form.leadType === "booking"
           ? "Thanks! Your demo booking is submitted. Our advisor will contact you shortly."
@@ -100,46 +117,50 @@ export default function LeadForm() {
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-ink">Email *</label>
+        <label className="mb-1 block text-xs font-medium text-ink">Email Address *</label>
         <input
+          type="email"
           value={form.email}
           onChange={(e) => updateField("email", e.target.value)}
           className="w-full rounded-lg border border-aviation-100 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
-          placeholder="you@example.com"
+          placeholder="your.email@example.com"
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-ink">Phone *</label>
+        <label className="mb-1 block text-xs font-medium text-ink">Phone Number *</label>
         <input
+          type="tel"
           value={form.phone}
           onChange={(e) => updateField("phone", e.target.value)}
           className="w-full rounded-lg border border-aviation-100 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
-          placeholder="01XXXXXXXXX"
+          placeholder="017XXXXXXXX"
         />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-ink">Request Type</label>
+        <label className="mb-1 block text-xs font-medium text-ink">Select Course</label>
         <select
-          value={form.leadType}
-          onChange={(e) => updateField("leadType", e.target.value as FormState["leadType"])}
-          className="w-full rounded-lg border border-aviation-100 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
-        >
-          <option value="registration">Course Registration</option>
-          <option value="booking">Book Free Demo</option>
-        </select>
-      </div>
-      <div>
-        <label className="mb-1 block text-xs font-medium text-ink">Preferred Course</label>
-        <input
           value={form.course}
           onChange={(e) => updateField("course", e.target.value)}
-          className="w-full rounded-lg border border-aviation-100 px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
-        />
+          className="w-full rounded-lg border border-aviation-100 bg-white px-3 py-2 text-sm outline-none ring-cyan-500 focus:ring"
+        >
+          <option value="Air Ticketing Course + GDS Training Masterclass">
+            Air Ticketing Course + GDS Training Masterclass
+          </option>
+          <option value="Amadeus Airline Reservation Training">Amadeus Airline Reservation Training</option>
+          <option value="Travelport GDS Training">Travelport GDS Training</option>
+          <option value="Sabre GDS Training">Sabre GDS Training</option>
+        </select>
       </div>
-      {error ? <p className="text-xs font-medium text-red-600">{error}</p> : null}
-      {success ? <p className="text-xs font-medium text-aviation-700">{success}</p> : null}
-      <button type="submit" disabled={isSubmitting} className="w-full rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-50">
-        {isSubmitting ? "Submitting..." : "Enroll Now"}
+
+      {error && <p className="text-xs font-medium text-rose-600">{error}</p>}
+      {success && <p className="text-xs font-medium text-emerald-600">{success}</p>}
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full rounded-full bg-gradient-to-r from-aviation-600 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-105 disabled:opacity-50"
+      >
+        {isSubmitting ? "Submitting..." : "Submit Demo Class Request"}
       </button>
     </form>
   );

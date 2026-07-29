@@ -91,6 +91,24 @@ export default function AdminHeroSliderPage() {
 
       if (res.ok) {
         showToast(editingSlide ? "Hero slide updated!" : "Hero slide created!", "success");
+
+        // Realtime notification push
+        try {
+          const { ref, push, set } = await import("firebase/database");
+          const { db } = await import("@/lib/firebase");
+          const notifRef = push(ref(db, "notifications"));
+          await set(notifRef, {
+            id: notifRef.key,
+            type: "general",
+            message: editingSlide ? `Hero slide "${title}" was updated.` : `New hero slide "${title}" was created.`,
+            link: "/",
+            read: false,
+            createdAt: new Date().toISOString()
+          });
+        } catch (notifErr) {
+          console.warn("Could not push notification:", notifErr);
+        }
+
         setIsModalOpen(false);
         setEditingSlide(null);
         fetchSlides();

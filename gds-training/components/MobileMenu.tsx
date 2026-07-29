@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, Award, Search } from "lucide-react";
 
 type NavItem = {
   id: string;
@@ -19,7 +19,18 @@ type Props = {
 
 export default function MobileMenu({ navItems }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const [certQuery, setCertQuery] = useState("");
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleCertSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = certQuery.trim();
+    if (!trimmed) return;
+    router.push(`/certificates/${encodeURIComponent(trimmed)}`);
+    setCertQuery("");
+    setIsOpen(false);
+  };
 
   // Close menu on route change
   useEffect(() => {
@@ -85,6 +96,26 @@ export default function MobileMenu({ navItems }: Props) {
 
           {/* CTA buttons */}
           <div className="flex flex-col gap-2">
+            {/* Certificate verifier */}
+            <form
+              onSubmit={handleCertSearch}
+              className="flex items-center gap-2 rounded-xl border border-aviation-200 bg-aviation-50 px-4 py-3"
+            >
+              <Award className="h-4 w-4 shrink-0 text-aviation-600" />
+              <input
+                type="text"
+                value={certQuery}
+                onChange={(e) => setCertQuery(e.target.value)}
+                placeholder="Verify certificate no…"
+                className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink/40"
+              />
+              <button
+                type="submit"
+                className="flex h-6 w-6 items-center justify-center rounded-full bg-aviation-600 text-white"
+              >
+                <Search className="h-3.5 w-3.5" />
+              </button>
+            </form>
             <Link
               href="/courses"
               onClick={() => setIsOpen(false)}

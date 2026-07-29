@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import PageTransition from "@/components/PageTransition";
 import ClientInit from "@/components/ClientInit";
 import { getGlobalSeo } from "@/lib/cms/seo";
+import ChatWidget from "@/components/ChatWidget";
 
 const sans = DM_Sans({
   subsets: ["latin"],
@@ -121,6 +122,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="pb-20 md:pb-0">{children}</main>
         </PageTransition>
         <Footer />
+        <ChatWidget />
       </body>
     </html>
   );
