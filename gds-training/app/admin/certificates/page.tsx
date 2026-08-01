@@ -18,6 +18,7 @@ import {
     Shield,
     X,
     Sparkles,
+    Edit3,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -45,9 +46,10 @@ export default function AdminCertificatesPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
+    const [editModalOpen, setEditModalOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
-    // Form state
+    // Form state - Issue
     const [selectedStudentType, setSelectedStudentType] = useState<"enrolled" | "custom">("enrolled");
     const [selectedStudent, setSelectedStudent] = useState<string>("");
     const [customStudentName, setCustomStudentName] = useState("");
@@ -60,6 +62,15 @@ export default function AdminCertificatesPage() {
     const [issueDate, setIssueDate] = useState(new Date().toISOString().split("T")[0]);
     const [grade, setGrade] = useState("Passed with Distinction");
     const [instructorName, setInstructorName] = useState("Md. Akib Hasan");
+
+    // Form state - Edit
+    const [editingCert, setEditingCert] = useState<Certificate | null>(null);
+    const [editStudentName, setEditStudentName] = useState("");
+    const [editStudentEmail, setEditStudentEmail] = useState("");
+    const [editCourseName, setEditCourseName] = useState("");
+    const [editIssueDate, setEditIssueDate] = useState("");
+    const [editGrade, setEditGrade] = useState("");
+    const [editInstructorName, setEditInstructorName] = useState("");
 
     // Load certificates, enrolled students, and courses
     useEffect(() => {
@@ -209,6 +220,50 @@ export default function AdminCertificatesPage() {
         }
     };
 
+    const handleOpenEditModal = (cert: Certificate) => {
+        setEditingCert(cert);
+        setEditStudentName(cert.studentName || "");
+        setEditStudentEmail(cert.studentEmail || "");
+        setEditCourseName(cert.courseName || "");
+        setEditIssueDate(cert.issueDate || new Date().toISOString().split("T")[0]);
+        setEditGrade(cert.grade || "Passed with Distinction");
+        setEditInstructorName(cert.instructorName || "Md. Akib Hasan");
+        setEditModalOpen(true);
+    };
+
+    const handleSaveEditCertificate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingCert) return;
+
+        if (!editStudentName.trim()) {
+            alert("Student name cannot be empty");
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const updatedCertData: Partial<Certificate> = {
+                studentName: editStudentName.trim(),
+                studentEmail: editStudentEmail.trim(),
+                courseName: editCourseName.trim(),
+                issueDate: editIssueDate,
+                completionDate: editIssueDate,
+                grade: editGrade.trim(),
+                instructorName: editInstructorName.trim(),
+            };
+
+            await update(ref(db, `certificates/${editingCert.id}`), updatedCertData);
+
+            setEditModalOpen(false);
+            setEditingCert(null);
+            alert("Certificate details updated successfully!");
+        } catch (err: any) {
+            alert("Failed to update certificate: " + err.message);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     const handleRevoke = async (cert: Certificate) => {
         if (!confirm(`Are you sure you want to revoke certificate ${cert.certificateNumber} for ${cert.studentName}?`)) return;
         try {
@@ -246,7 +301,7 @@ export default function AdminCertificatesPage() {
                         E-Certificates Management
                     </h1>
                     <p className="mt-1 text-ink/50 text-sm">
-                        Issue verified course completion certificates for standard or custom courses.
+                        Issue verified course completion certificates or correct student information on existing certificates.
                     </p>
                 </div>
                 <button
@@ -360,6 +415,14 @@ export default function AdminCertificatesPage() {
                                                     <ExternalLink className="h-3.5 w-3.5" />
                                                     View & Print
                                                 </Link>
+                                                <button
+                                                    onClick={() => handleOpenEditModal(cert)}
+                                                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 text-xs font-bold transition-colors"
+                                                    title="Edit Certificate / Correct Student Info"
+                                                >
+                                                    <Edit3 className="h-3.5 w-3.5" />
+                                                    Edit Info
+                                                </button>
                                                 <button
                                                     onClick={() => handleRevoke(cert)}
                                                     className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
@@ -554,6 +617,126 @@ export default function AdminCertificatesPage() {
                                 <Sparkles className="h-4 w-4" />
                                 {submitting ? "Issuing Certificate..." : "Generate & Issue Certificate"}
                             </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Certificate Modal */}
+            {editModalOpen && editingCert && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    onClick={() => setEditModalOpen(false)}
+                >
+                    <div
+                        className="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 space-y-5 overflow-y-auto max-h-[90vh]"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between border-b border-aviation-50 pb-3">
+                            <h3 className="text-lg font-bold text-ink flex items-center gap-2">
+                                <Edit3 className="h-5 w-5 text-amber-500" />
+                                Correct Certificate & Student Information
+                            </h3>
+                            <button onClick={() => setEditModalOpen(false)} className="text-ink/40 hover:text-ink">
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSaveEditCertificate} className="space-y-4">
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 font-medium">
+                                Editing Certificate ID: <strong className="font-mono">{editingCert.certificateNumber}</strong>. Correcting student information here will immediately update the official certificate display page.
+                            </div>
+
+                            {/* Student Full Name */}
+                            <div>
+                                <label className="block text-xs font-bold text-ink mb-1">
+                                    Student Full Name <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editStudentName}
+                                    onChange={(e) => setEditStudentName(e.target.value)}
+                                    placeholder="Enter actual full name of student"
+                                    className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm font-semibold text-ink outline-none focus:border-aviation-600"
+                                    required
+                                />
+                            </div>
+
+                            {/* Student Email */}
+                            <div>
+                                <label className="block text-xs font-bold text-ink mb-1">Student Email</label>
+                                <input
+                                    type="email"
+                                    value={editStudentEmail}
+                                    onChange={(e) => setEditStudentEmail(e.target.value)}
+                                    placeholder="student@example.com"
+                                    className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm outline-none focus:border-aviation-600"
+                                />
+                            </div>
+
+                            {/* Course Title */}
+                            <div>
+                                <label className="block text-xs font-bold text-ink mb-1">Course Title</label>
+                                <input
+                                    type="text"
+                                    value={editCourseName}
+                                    onChange={(e) => setEditCourseName(e.target.value)}
+                                    className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm font-semibold outline-none focus:border-aviation-600"
+                                    required
+                                />
+                            </div>
+
+                            {/* Issue Date & Grade */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs font-semibold text-ink mb-1">Issue Date</label>
+                                    <input
+                                        type="date"
+                                        value={editIssueDate}
+                                        onChange={(e) => setEditIssueDate(e.target.value)}
+                                        className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm outline-none focus:border-aviation-600 bg-white"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-ink mb-1">Grade / Distinction</label>
+                                    <input
+                                        type="text"
+                                        value={editGrade}
+                                        onChange={(e) => setEditGrade(e.target.value)}
+                                        className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm outline-none focus:border-aviation-600"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Instructor Name */}
+                            <div>
+                                <label className="block text-xs font-semibold text-ink mb-1">Instructor Name</label>
+                                <input
+                                    type="text"
+                                    value={editInstructorName}
+                                    onChange={(e) => setEditInstructorName(e.target.value)}
+                                    className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm outline-none focus:border-aviation-600"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditModalOpen(false)}
+                                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={submitting}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-aviation-600 hover:bg-aviation-700 text-white font-bold py-2.5 rounded-xl shadow-soft text-sm transition-all disabled:opacity-60"
+                                >
+                                    <Sparkles className="h-4 w-4" />
+                                    {submitting ? "Saving..." : "Save Corrected Info"}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, Award, Search } from "lucide-react";
+import AuthButtons from "./AuthButtons";
 
 type NavItem = {
   id: string;
@@ -66,10 +67,10 @@ export default function MobileMenu({ navItems }: Props) {
       {/* Slide-down drawer */}
       <div
         className={`fixed left-0 right-0 top-[57px] z-50 origin-top overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 pointer-events-none"
+          isOpen ? "max-h-[calc(100vh-57px)] opacity-100" : "max-h-0 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="border-b border-aviation-100 bg-white/95 px-5 py-4 shadow-xl backdrop-blur-md">
+        <div className="border-b border-aviation-100 bg-white/95 px-5 py-4 shadow-xl backdrop-blur-md max-h-[calc(100vh-60px)] overflow-y-auto">
           {/* Nav links */}
           <ul className="flex flex-col gap-1">
             {navItems
@@ -131,6 +132,9 @@ export default function MobileMenu({ navItems }: Props) {
               Enroll Now
             </a>
           </div>
+
+          {/* Auth Section */}
+          <AuthButtons isMobile onItemClick={() => setIsOpen(false)} />
         </div>
       </div>
     </>

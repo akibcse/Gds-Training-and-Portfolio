@@ -16,7 +16,10 @@ import {
     CreditCard,
     Mail,
     Phone,
-    BookOpen
+    BookOpen,
+    Edit3,
+    X,
+    Sparkles
 } from "lucide-react";
 
 export default function AdminPaymentsPage() {
@@ -27,6 +30,13 @@ export default function AdminPaymentsPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState("Approved"); // Default to Enrolled Students
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Edit Student Info state
+  const [editingSub, setEditingSub] = useState<any | null>(null);
+  const [editStudentName, setEditStudentName] = useState("");
+  const [editStudentEmail, setEditStudentEmail] = useState("");
+  const [editStudentPhone, setEditStudentPhone] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
@@ -144,6 +154,46 @@ export default function AdminPaymentsPage() {
     }
   };
 
+  const handleOpenEditStudentModal = (sub: any) => {
+    setEditingSub(sub);
+    setEditStudentName(sub.studentName || "");
+    setEditStudentEmail(sub.studentEmail || "");
+    setEditStudentPhone(sub.studentPhone || "");
+  };
+
+  const handleSaveStudentInfo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSub) return;
+    if (!editStudentName.trim()) {
+      alert("Student name cannot be empty");
+      return;
+    }
+
+    setIsSavingEdit(true);
+    try {
+      const updates: any = {};
+      updates[`payment_submissions/${editingSub.id}/studentName`] = editStudentName.trim();
+      updates[`payment_submissions/${editingSub.id}/studentEmail`] = editStudentEmail.trim();
+      updates[`payment_submissions/${editingSub.id}/studentPhone`] = editStudentPhone.trim();
+
+      // If enrollment exists, update enrollment record as well
+      if (editingSub.studentId && editingSub.courseId) {
+        const enrollmentId = `${editingSub.studentId}_${editingSub.courseId}`;
+        updates[`enrollments/${enrollmentId}/studentName`] = editStudentName.trim();
+        updates[`enrollments/${enrollmentId}/studentEmail`] = editStudentEmail.trim();
+        updates[`enrollments/${enrollmentId}/studentPhone`] = editStudentPhone.trim();
+      }
+
+      await update(ref(db), updates);
+      setEditingSub(null);
+      alert("Student information updated successfully!");
+    } catch (err: any) {
+      alert("Failed to update student info: " + err.message);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   // Stats Calculations
   const approvedList = submissions.filter(s => s.status === "Approved");
   const pendingList = submissions.filter(s => s.status === "Pending");
@@ -182,7 +232,7 @@ export default function AdminPaymentsPage() {
             Enrolled Students & Payments
           </h1>
           <p className="mt-1 text-ink/50">
-            View student enrollment records, manage manual bKash transactions, and approve course access.
+            View student enrollment records, manage manual bKash transactions, and correct student info.
           </p>
         </div>
       </div>
@@ -368,9 +418,18 @@ export default function AdminPaymentsPage() {
                           </button>
                         </div>
                       ) : (
-                        <span className="text-ink/40 text-xs italic">
-                          {sub.status === 'Approved' ? `Verified by ${sub.approvedBy || 'Admin'}` : `Rejected by ${sub.rejectedBy || 'Admin'}`}
-                        </span>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenEditStudentModal(sub)}
+                            className="px-2.5 py-1.5 rounded-lg bg-aviation-50 text-aviation-700 hover:bg-aviation-100 text-xs font-bold transition-colors flex items-center gap-1"
+                            title="Edit Student Details"
+                          >
+                            <Edit3 className="h-3.5 w-3.5" /> Edit Info
+                          </button>
+                          <span className="text-ink/40 text-xs italic">
+                            {sub.status === 'Approved' ? `Verified by ${sub.approvedBy || 'Admin'}` : `Rejected by ${sub.rejectedBy || 'Admin'}`}
+                          </span>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -380,6 +439,85 @@ export default function AdminPaymentsPage() {
           </table>
         </div>
       </div>
+
+      {/* Edit Student Info Modal */}
+      {editingSub && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={() => setEditingSub(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-aviation-50 pb-3">
+              <h3 className="text-lg font-bold text-ink flex items-center gap-2">
+                <Edit3 className="h-5 w-5 text-aviation-600" />
+                Correct Student Information
+              </h3>
+              <button onClick={() => setEditingSub(null)} className="text-ink/40 hover:text-ink">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveStudentInfo} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-ink mb-1">
+                  Student Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={editStudentName}
+                  onChange={(e) => setEditStudentName(e.target.value)}
+                  placeholder="Full Name"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm font-semibold outline-none focus:border-aviation-600"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-ink mb-1">Student Email</label>
+                <input
+                  type="email"
+                  value={editStudentEmail}
+                  onChange={(e) => setEditStudentEmail(e.target.value)}
+                  placeholder="Email"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm outline-none focus:border-aviation-600"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-ink mb-1">Student Phone</label>
+                <input
+                  type="tel"
+                  value={editStudentPhone}
+                  onChange={(e) => setEditStudentPhone(e.target.value)}
+                  placeholder="Phone Number"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-aviation-100 text-sm outline-none focus:border-aviation-600"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingSub(null)}
+                  className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingEdit}
+                  className="flex-1 flex items-center justify-center gap-2 bg-aviation-600 hover:bg-aviation-700 text-white font-bold py-2.5 rounded-xl shadow-soft text-sm transition-all disabled:opacity-60"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {isSavingEdit ? "Saving..." : "Save Details"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

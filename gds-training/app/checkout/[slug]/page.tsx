@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useParams, useRouter } from "next/navigation";
 import { getCourseBySlug, Course } from "@/lib/getData";
-import { ref, push, set } from "firebase/database";
+import { ref, push, set, update } from "firebase/database";
 import { db } from "@/lib/firebase";
 // Note: In a real implementation we would also use firebase/storage for the screenshot.
 import { CheckCircle, UploadCloud, AlertCircle, Copy, Check, Info, Lock } from "lucide-react";
@@ -19,6 +19,9 @@ export default function CheckoutPage() {
   const [loadingCourse, setLoadingCourse] = useState(true);
   
   const [paymentMethod, setPaymentMethod] = useState("manual_bkash");
+  // Pre-fill student name: prefer fullName over displayName, skip 'Student' fallback
+  const profileName = (profile as any)?.fullName || profile?.displayName || "";
+  const [studentName, setStudentName] = useState(profileName !== "Student" ? profileName : "");
   const [phone, setPhone] = useState("");
   const [txnId, setTxnId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,6 +29,14 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
 
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    // When profile loads, update name if field is still empty (skip 'Student' default)
+    const name = (profile as any)?.fullName || profile?.displayName || "";
+    if (name && name !== "Student" && !studentName) {
+      setStudentName(name);
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -56,6 +67,10 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studentName.trim()) {
+      setError("Full Name is required.");
+      return;
+    }
     if (!txnId || !phone) {
       setError("Transaction ID and Mobile Number are required.");
       return;
@@ -65,11 +80,12 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
+      const finalName = studentName.trim();
       const submissionRef = push(ref(db, 'payment_submissions'));
       const newSubmission = {
         id: submissionRef.key,
         studentId: user.uid,
-        studentName: profile?.displayName || "Student",
+        studentName: finalName,
         studentEmail: user.email,
         studentPhone: phone,
         courseId: course.slug,
@@ -79,10 +95,20 @@ export default function CheckoutPage() {
         paymentMethod: "Manual bKash",
         status: "Pending",
         submittedAt: new Date().toISOString(),
-        screenshotUrl: "" // omitted storage upload for brevity in this mockup
+        screenshotUrl: ""
       };
 
       await set(submissionRef, newSubmission);
+
+      // Save the entered full name back to user profile so it appears correctly everywhere
+      if (user.uid && finalName) {
+        await update(ref(db, `users/${user.uid}`), {
+          fullName: finalName,
+          displayName: finalName,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
       setSuccess(true);
       
       // Redirect after 3 seconds
@@ -197,6 +223,20 @@ export default function CheckoutPage() {
                       <AlertCircle className="h-4 w-4 shrink-0" /> {error}
                     </div>
                   )}
+
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">
+                      Full Name <span className="text-xs text-slate-500 font-normal">(As it should appear on your Certificate)</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      required
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      className="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#E2136E] focus:border-[#E2136E] outline-none font-semibold text-slate-800"
+                      placeholder="e.g. Md. Rafiqul Islam"
+                    />
+                  </div>
                   
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1">Your Mobile Number (bKash Number)</label>

@@ -10,6 +10,7 @@ export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
+  fullName?: string;
   photoURL: string;
   role: UserRole;
   createdAt: string;
@@ -69,10 +70,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({ profile: currentProfile, isLoading: false });
         } else {
           // Create default profile for new user
+          // Use displayName from Firebase Auth (Google sets this), otherwise leave blank
+          const userName = user.displayName || '';
           const newProfile: UserProfile = {
             uid: user.uid,
             email: user.email || '',
-            displayName: user.displayName || 'Student',
+            displayName: userName,
+            fullName: userName,
             photoURL: user.photoURL || '',
             role: isAdminEmail ? "admin" : "student",
             createdAt: new Date().toISOString()

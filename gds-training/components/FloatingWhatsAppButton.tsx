@@ -17,7 +17,7 @@ export default function FloatingWhatsAppButton({ href }: Props) {
       aria-label="Chat on WhatsApp"
       animate={reduce ? undefined : { y: [0, -5, 0] }}
       transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-      className="fixed bottom-5 left-4 z-50 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-emerald-400/40 hover:scale-105 active:scale-95 transition-all"
+      className="fixed bottom-20 md:bottom-5 left-4 z-50 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-emerald-400/40 hover:scale-105 active:scale-95 transition-all"
     >
       {/* WhatsApp SVG icon */}
       <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current shrink-0" xmlns="http://www.w3.org/2000/svg">

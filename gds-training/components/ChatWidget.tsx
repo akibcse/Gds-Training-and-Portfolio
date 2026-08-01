@@ -89,7 +89,7 @@ export default function ChatWidget() {
 
         try {
             const now = new Date().toISOString();
-            const studentName = profile?.displayName || user.email?.split("@")[0] || "Student";
+            const studentName = (profile as any)?.fullName || profile?.displayName || user.email?.split("@")[0] || "Student";
 
             // Add message
             const msgRef = push(ref(db, `${chatPath}/messages`));

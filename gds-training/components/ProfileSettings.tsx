@@ -95,6 +95,7 @@ export default function ProfileSettings() {
       // Update Realtime DB
       await update(ref(db, `users/${currentUser.uid}`), {
         displayName: displayName.trim(),
+        fullName: displayName.trim(),
         photoURL: photoURL.trim(),
       });
 
@@ -103,6 +104,7 @@ export default function ProfileSettings() {
         setProfile({
           ...profile,
           displayName: displayName.trim(),
+          fullName: displayName.trim(),
           photoURL: photoURL.trim(),
         });
       }

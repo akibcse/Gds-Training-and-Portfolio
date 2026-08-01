@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users, Shield, UserCheck, Mail, Phone, Trash2, Edit3, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Users, Shield, UserCheck, Mail, Phone, Trash2, Edit3, Search, MessageCircle } from "lucide-react";
 import DataTable from "@/components/admin/DataTable";
 import ConfirmModal from "@/components/admin/ConfirmModal";
 import Toast, { useToast } from "@/components/admin/Toast";
 import type { UserProfile, UserRole } from "@/lib/cms/users";
 
 export default function UsersManagementPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,7 +60,8 @@ export default function UsersManagementPage() {
       const res = await fetch(`/api/admin/users/${editingUser.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, email, phone, role })
+        // Also update displayName so certificates show the correct name
+        body: JSON.stringify({ fullName, displayName: fullName, email, phone, role })
       });
 
       if (res.ok) {
@@ -149,6 +152,27 @@ export default function UsersManagementPage() {
           {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : u.updatedAt ? new Date(u.updatedAt).toLocaleDateString() : "Unknown"}
         </span>
       )
+    },
+    {
+      header: "Quick Action",
+      accessor: (u: UserProfile) => (
+        <button
+          onClick={() => {
+            const displayName = u.fullName || u.displayName || u.name || "Student";
+            const params = new URLSearchParams({
+              studentId: u.id || "",
+              name: displayName,
+              email: u.email || "",
+            });
+            router.push(`/admin/chat?${params.toString()}`);
+          }}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-aviation-50 text-aviation-700 hover:bg-aviation-100 text-xs font-bold transition-colors"
+          title="Open Chat with Student"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          Chat
+        </button>
+      )
     }
   ];
 
@@ -177,13 +201,18 @@ export default function UsersManagementPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-ink/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
           <div className="relative w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl z-10 animate-in fade-in zoom-in duration-200">
-            <h2 className="text-2xl font-bold text-ink">Edit User Account</h2>
+            <h2 className="text-2xl font-bold text-ink">Edit Student Profile</h2>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-xs text-amber-800 font-medium">
+                ⚠️ Updating the <strong>Full Name</strong> here also updates how the student's name appears on any certificates issued to them.
+              </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name <span className="text-red-500">*</span></label>
                 <input
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Student's full name (as it should appear on certificate)"
+                  required
                   className="h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm font-semibold outline-none focus:border-aviation-500"
                 />
               </div>

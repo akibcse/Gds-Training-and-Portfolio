@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { ref, onValue, push, set, update } from "firebase/database";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { ref, onValue, push, set, update, get } from "firebase/database";
 import { db } from "@/lib/firebase";
 import { useAuthStore } from "@/store/useAuthStore";
 import {
@@ -12,6 +13,8 @@ import {
     Loader2,
     CheckCheck,
     Clock,
+    ArrowLeft,
+    UserPlus,
 } from "lucide-react";
 
 interface Message {
@@ -34,16 +37,76 @@ interface Chat {
     messages?: Record<string, Message>;
 }
 
-export default function AdminChatPage() {
+function AdminChatContent() {
     const { user, profile } = useAuthStore();
+    const searchParams = useSearchParams();
+
     const [chats, setChats] = useState<Chat[]>([]);
     const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [reply, setReply] = useState("");
     const [sending, setSending] = useState(false);
     const [search, setSearch] = useState("");
+    const [initializing, setInitializing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
+
+    // Handle URL params: studentId, name, email (from Users page "Chat" button)
+    useEffect(() => {
+        const studentIdParam = searchParams?.get("studentId");
+        const nameParam = searchParams?.get("name");
+        const emailParam = searchParams?.get("email");
+
+        if (!studentIdParam) return;
+
+        // Check if chat already exists in loaded chats
+        const existingChat = chats.find(c => c.studentId === studentIdParam);
+        if (existingChat) {
+            setSelectedChat(existingChat);
+            return;
+        }
+
+        // Check Firebase directly (in case chats haven't loaded yet)
+        setInitializing(true);
+        const chatRef = ref(db, `chats/${studentIdParam}`);
+        get(chatRef).then((snap) => {
+            if (snap.exists()) {
+                setSelectedChat(snap.val() as Chat);
+            } else {
+                // Create a placeholder chat thread for admin to initiate
+                const placeholder: Chat = {
+                    studentId: studentIdParam,
+                    studentName: nameParam || "Student",
+                    studentEmail: emailParam || "",
+                    lastMessage: "",
+                    lastMessageAt: "",
+                    unreadByAdmin: 0,
+                };
+                setSelectedChat(placeholder);
+            }
+        }).catch(() => {
+            const placeholder: Chat = {
+                studentId: studentIdParam,
+                studentName: nameParam || "Student",
+                studentEmail: emailParam || "",
+                lastMessage: "",
+                lastMessageAt: "",
+                unreadByAdmin: 0,
+            };
+            setSelectedChat(placeholder);
+        }).finally(() => setInitializing(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
+
+    // Re-check when chats load (match URL param to loaded chat)
+    useEffect(() => {
+        const studentIdParam = searchParams?.get("studentId");
+        if (!studentIdParam || !chats.length) return;
+        const existingChat = chats.find(c => c.studentId === studentIdParam);
+        if (existingChat && selectedChat?.studentId === studentIdParam) {
+            setSelectedChat(existingChat);
+        }
+    }, [chats, searchParams, selectedChat?.studentId]);
 
     // Load all chat threads
     useEffect(() => {
@@ -109,6 +172,20 @@ export default function AdminChatPage() {
             const now = new Date().toISOString();
             const adminName = profile?.displayName || "Admin Support";
 
+            // Ensure the chat thread exists in Firebase (for admin-initiated chats)
+            const chatNodeRef = ref(db, `chats/${selectedChat.studentId}`);
+            const chatSnap = await get(chatNodeRef);
+            if (!chatSnap.exists()) {
+                await set(chatNodeRef, {
+                    studentId: selectedChat.studentId,
+                    studentName: selectedChat.studentName,
+                    studentEmail: selectedChat.studentEmail,
+                    lastMessage: "",
+                    lastMessageAt: "",
+                    unreadByAdmin: 0,
+                });
+            }
+
             const msgRef = push(ref(db, `chats/${selectedChat.studentId}/messages`));
             await set(msgRef, {
                 id: msgRef.key,
@@ -126,16 +203,18 @@ export default function AdminChatPage() {
             });
 
             // Push notification to student
-            const studentNotifRef = push(ref(db, `student_notifications/${selectedChat.studentId}`));
-            await set(studentNotifRef, {
-                id: studentNotifRef.key,
-                studentId: selectedChat.studentId,
-                type: "chat_reply",
-                message: `Admin Support: ${msgText.slice(0, 60)}${msgText.length > 60 ? "..." : ""}`,
-                link: "/dashboard",
-                read: false,
-                createdAt: now,
-            });
+            if (!selectedChat.studentId.startsWith("custom_")) {
+                const studentNotifRef = push(ref(db, `student_notifications/${selectedChat.studentId}`));
+                await set(studentNotifRef, {
+                    id: studentNotifRef.key,
+                    studentId: selectedChat.studentId,
+                    type: "chat_reply",
+                    message: `Admin Support: ${msgText.slice(0, 60)}${msgText.length > 60 ? "..." : ""}`,
+                    link: "/dashboard",
+                    read: false,
+                    createdAt: now,
+                });
+            }
         } catch (err) {
             console.error("Failed to send reply:", err);
         } finally {
@@ -183,7 +262,7 @@ export default function AdminChatPage() {
                         Live Chat Support
                     </h1>
                     <p className="mt-1 text-ink/50 text-sm">
-                        Respond to student queries in real-time.
+                        Respond to student queries or start new conversations. Use the <strong>Users</strong> page to chat any student.
                     </p>
                 </div>
                 {totalUnread > 0 && (
@@ -219,7 +298,8 @@ export default function AdminChatPage() {
                         {filteredChats.length === 0 ? (
                             <div className="p-8 text-center text-ink/40">
                                 <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                                <p className="text-sm">No conversations yet</p>
+                                <p className="text-sm font-medium">No conversations yet</p>
+                                <p className="text-xs mt-1 text-ink/30">Go to <strong>User Management</strong> to start a chat with any student.</p>
                             </div>
                         ) : (
                             filteredChats.map((chat) => (
@@ -266,24 +346,39 @@ export default function AdminChatPage() {
                                 onClick={() => setSelectedChat(null)}
                                 className="md:hidden text-ink/60 hover:text-ink"
                             >
-                                ←
+                                <ArrowLeft className="h-4 w-4" />
                             </button>
                             <div className="h-9 w-9 rounded-full bg-gradient-to-br from-aviation-600 to-cyan-500 text-white text-xs font-bold flex items-center justify-center shrink-0">
                                 {(selectedChat.studentName || "S").charAt(0).toUpperCase()}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="font-bold text-ink text-sm truncate">{selectedChat.studentName}</p>
-                                <p className="text-xs text-ink/50 truncate">{selectedChat.studentEmail}</p>
+                                <p className="text-xs text-ink/50 truncate">{selectedChat.studentEmail || "No email"}</p>
                             </div>
+                            {/* Show "New Conversation" badge if no messages yet */}
+                            {messages.length === 0 && (
+                                <span className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-aviation-600 bg-aviation-50 border border-aviation-200 px-2.5 py-1 rounded-full">
+                                    <UserPlus className="h-3.5 w-3.5" />
+                                    New Conversation
+                                </span>
+                            )}
                         </div>
 
                         {/* Messages */}
                         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-slate-50/50">
-                            {messages.length === 0 ? (
+                            {initializing ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <Loader2 className="h-6 w-6 animate-spin text-aviation-400" />
+                                </div>
+                            ) : messages.length === 0 ? (
                                 <div className="flex flex-col items-center gap-2 py-12 text-center">
-                                    <MessageCircle className="h-10 w-10 text-aviation-200" />
-                                    <p className="text-sm text-ink/40 font-medium">No messages yet</p>
-                                    <p className="text-xs text-ink/30">Send a reply to start the conversation</p>
+                                    <div className="h-14 w-14 rounded-2xl bg-aviation-50 flex items-center justify-center">
+                                        <MessageCircle className="h-7 w-7 text-aviation-300" />
+                                    </div>
+                                    <p className="text-sm text-ink/60 font-semibold mt-2">Start the conversation</p>
+                                    <p className="text-xs text-ink/30 max-w-xs">
+                                        Send a message to <strong>{selectedChat.studentName}</strong>. They'll receive a notification when you reply.
+                                    </p>
                                 </div>
                             ) : (
                                 messages.map((msg) => {
@@ -324,7 +419,7 @@ export default function AdminChatPage() {
                                 value={reply}
                                 onChange={(e) => setReply(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                placeholder={`Reply to ${selectedChat.studentName}...`}
+                                placeholder={`Message ${selectedChat.studentName}...`}
                                 rows={2}
                                 className="flex-1 resize-none rounded-xl border border-aviation-100 px-3.5 py-2.5 text-sm outline-none focus:border-aviation-400 focus:ring-2 focus:ring-aviation-500/10 transition-all max-h-32 overflow-y-auto"
                             />
@@ -349,12 +444,24 @@ export default function AdminChatPage() {
                         <div>
                             <p className="font-bold text-ink">Select a Conversation</p>
                             <p className="text-sm text-ink/40 mt-1">
-                                Choose a student from the list to view and reply to their messages.
+                                Choose a student from the list, or go to <strong>User Management</strong> to start a new chat.
                             </p>
                         </div>
                     </div>
                 )}
             </div>
         </div>
+    );
+}
+
+export default function AdminChatPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-aviation-400" />
+            </div>
+        }>
+            <AdminChatContent />
+        </Suspense>
     );
 }

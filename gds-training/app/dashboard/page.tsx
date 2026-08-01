@@ -160,14 +160,14 @@ export default function StudentDashboard() {
                 <img src={profile.photoURL} alt="Profile" className="h-20 w-20 rounded-full object-cover border-4 border-[#1D4ED8]" />
               ) : (
                 <div className="h-20 w-20 rounded-full bg-blue-900 border-4 border-[#1D4ED8] flex items-center justify-center text-white text-2xl font-bold">
-                  {profile?.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase() || "S"}
+                  {((profile as any)?.fullName || profile?.displayName)?.charAt(0) || user.email?.charAt(0).toUpperCase() || "U"}
                 </div>
               )}
               <div>
-                <h1 className="text-3xl font-bold text-white">Welcome, {profile?.displayName || "Student"}!</h1>
+                <h1 className="text-3xl font-bold text-white">Welcome, {(profile as any)?.fullName || profile?.displayName || user.email?.split("@")[0] || "User"}!</h1>
                 <p className="text-slate-400 mt-1">{profile?.email || user.email}</p>
                 <div className="mt-2 inline-block bg-blue-900/50 text-blue-300 border border-blue-800 rounded px-2 py-0.5 text-xs font-semibold uppercase tracking-wider">
-                  {profile?.role || "Student"} Account
+                  {profile?.role || "student"} Account
                 </div>
               </div>
             </div>
@@ -464,7 +464,7 @@ export default function StudentDashboard() {
 
             <ReviewForm
               studentId={user.uid}
-              studentName={profile?.displayName || user.email?.split("@")[0] || "Student"}
+              studentName={(profile as any)?.fullName || profile?.displayName || user.email?.split("@")[0] || "Student"}
               studentEmail={user.email || ""}
               courseId={reviewModalCourse.courseId || reviewModalCourse.id}
               courseName={reviewModalCourse.courseName || "Course"}

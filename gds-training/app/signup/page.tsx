@@ -30,11 +30,12 @@ export default function SignupPage() {
       });
 
       // Firebase Realtime DB init is handled in useAuthStore automatically
-      // However, to ensure name is saved immediately:
+      // However, to ensure name is saved immediately with both fields:
       await set(ref(db, `users/${userCredential.user.uid}`), {
         uid: userCredential.user.uid,
         email: email,
         displayName: name,
+        fullName: name,
         photoURL: "",
         role: "student",
         createdAt: new Date().toISOString()
