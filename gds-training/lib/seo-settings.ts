@@ -9,8 +9,10 @@ export const getSeoOverride = async (pageKey: string) => {
     metaTitle: pageSeo.title,
     metaDescription: pageSeo.description,
     keywords: pageSeo.keywords,
-    canonicalUrl: "", // We can add this to the CMS PageSeo if needed
+    canonicalUrl: pageSeo.slug ? `/${pageSeo.slug.replace(/^\//, "")}` : "",
     ogTitle: pageSeo.title,
     ogDescription: pageSeo.description,
+    ogImage: pageSeo.ogImage,
+    jsonLd: pageSeo.jsonLd,
   };
 };

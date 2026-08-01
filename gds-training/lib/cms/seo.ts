@@ -26,16 +26,31 @@ export type PageSeo = {
 const GLOBAL_PATH = "cms/seo/global";
 const PAGES_PATH = "cms/seo/pages";
 
-export const getGlobalSeo = async (): Promise<GlobalSeo | null> => {
+export const DEFAULT_GLOBAL_SEO: GlobalSeo = {
+    siteUrl: "https://akibhasan.online",
+    siteName: "Md. Akib Hasan",
+    defaultTitle: "Get personalized GDS training from Md. Akib Hasan",
+    titleTemplate: "%s | Md. Akib Hasan",
+    defaultDescription: "Professional GDS Training and Air Ticketing courses in Bangladesh.",
+    defaultKeywords: ["GDS", "Training", "Aviation", "Air Ticketing", "Amadeus", "Sabre", "Travelport"],
+    defaultOgImage: "https://akibhasan.online/api/og?title=Md.+Akib+Hasan",
+    twitterHandle: "@akibhasan",
+    googleVerification: "wyMy_PJ7kZvizW2GTPUZN9NSmNTaDjsbdjcJ3C3hrlY",
+    bingVerification: ""
+};
+
+export const getGlobalSeo = async (): Promise<GlobalSeo> => {
     const db = getFirebaseDatabase();
-    if (!db) return null;
+    if (!db) return DEFAULT_GLOBAL_SEO;
 
     try {
         const snapshot = await get(ref(db, GLOBAL_PATH));
-        return snapshot.val() as GlobalSeo;
+        const val = snapshot.val();
+        if (!val) return DEFAULT_GLOBAL_SEO;
+        return { ...DEFAULT_GLOBAL_SEO, ...val };
     } catch (error) {
         console.error("Error fetching global SEO:", error);
-        return null;
+        return DEFAULT_GLOBAL_SEO;
     }
 };
 

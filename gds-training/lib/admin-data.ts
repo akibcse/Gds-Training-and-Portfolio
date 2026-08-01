@@ -255,13 +255,13 @@ export const getPortfolioProfileRecord = () =>
 export const setPortfolioProfileRecord = async (row: PortfolioProfileRecord) => await writeJsonFile(FILES.portfolioProfile, row);
 
 export const getSeoGlobal = async () => await readJsonObjectOrDefault<SeoGlobal>(FILES.seoGlobal, {
-  siteUrl: "https://example.com",
-  siteName: "Training Institute",
-  defaultTitle: "Training Institute",
-  titleTemplate: "%s | Training Institute",
-  defaultDescription: "Practical training and career-ready programs.",
-  defaultKeywords: [],
-  twitterHandle: "",
+  siteUrl: "https://akibhasan.online",
+  siteName: "Md. Akib Hasan",
+  defaultTitle: "Get personalized GDS training from Md. Akib Hasan",
+  titleTemplate: "%s | Md. Akib Hasan",
+  defaultDescription: "Professional GDS Training and Air Ticketing courses in Bangladesh.",
+  defaultKeywords: ["GDS", "Training", "Air Ticketing"],
+  twitterHandle: "@akibhasan",
   locale: "en_US",
   twitterCard: "summary_large_image"
 });

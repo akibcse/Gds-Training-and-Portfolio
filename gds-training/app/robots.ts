@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { headers } from "next/headers";
 import { getSeo } from "@/lib/getData";
 
-const DEFAULT_URL = "https://training.airtechaviation.click";
+const DEFAULT_URL = "https://akibhasan.online";
 
 const normalizeBaseUrl = (value?: string | null) => {
   if (!value) return DEFAULT_URL;

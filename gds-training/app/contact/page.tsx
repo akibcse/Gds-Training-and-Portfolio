@@ -2,25 +2,31 @@ import type { Metadata } from "next";
 import LeadForm from "@/components/LeadForm";
 import SEO from "@/components/SEO";
 import { getProfile, getSeo } from "@/lib/getData";
+import { getSeoOverride } from "@/lib/seo-settings";
 import { breadcrumbSchema } from "@/lib/structuredData";
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeo();
-  const title = "Contact for GDS Training in Dhaka, Bangladesh";
-  const description =
+  const [seo, override] = await Promise.all([getSeo(), getSeoOverride("contact")]);
+  const defaultTitle = "Contact for GDS Training in Dhaka, Bangladesh";
+  const defaultDescription =
     "Enroll in the best GDS Training in Bangladesh. Contact us for Amadeus, Sabre, and Travelport courses, batch schedules, and fees for air ticketing careers.";
+
+  const title = override?.metaTitle || defaultTitle;
+  const description = override?.metaDescription || defaultDescription;
+  const siteUrl = seo?.siteUrl || "https://akibhasan.online";
 
   return {
     title,
     description,
-    keywords: ["GDS Training in Dhaka", "Amadeus Course Bangladesh", "Air Ticketing Course"],
-    alternates: { canonical: "/contact" },
+    keywords: override?.keywords?.length ? override.keywords : ["GDS Training in Dhaka", "Amadeus Course Bangladesh", "Air Ticketing Course"],
+    alternates: { canonical: override?.canonicalUrl || "/contact" },
     openGraph: {
-      title: `${title} | ${seo?.siteName || 'GDS Training'}`,
-      description,
-      url: `${seo?.siteUrl || 'https://gds-training.vercel.app'}/contact`
+      title: override?.ogTitle || `${title} | ${seo?.siteName || 'Md. Akib Hasan'}`,
+      description: override?.ogDescription || description,
+      url: `${siteUrl}/contact`,
+      images: override?.ogImage ? [{ url: override.ogImage }] : undefined
     },
     twitter: { card: "summary", title, description }
   };

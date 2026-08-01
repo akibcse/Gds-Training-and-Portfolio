@@ -36,7 +36,7 @@ export default function SeoPage() {
 
     const { toast, showToast, hideToast } = useToast();
 
-    const globalPreviewUrl = globalSeo?.siteUrl?.trim() || "https://training.airtechaviation.click";
+    const globalPreviewUrl = globalSeo?.siteUrl?.trim() || "https://akibhasan.online";
     const globalPreviewTitle = globalSeo?.defaultTitle?.trim() || "Homepage Title";
     const globalPreviewDescription = globalSeo?.defaultDescription?.trim() || "Homepage description appears here.";
     const globalPreviewImage = globalSeo?.defaultOgImage?.trim() || "";

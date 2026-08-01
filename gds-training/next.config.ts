@@ -13,6 +13,43 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["framer-motion"]
+  },
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "gds-training.vercel.app",
+          },
+        ],
+        destination: "https://akibhasan.online/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "training.airtechaviation.click",
+          },
+        ],
+        destination: "https://akibhasan.online/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "airtech-aviation-ota.vercel.app",
+          },
+        ],
+        destination: "https://akibhasan.online/:path*",
+        permanent: true,
+      },
+    ];
   }
 };
 

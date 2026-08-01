@@ -1,29 +1,37 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { getPortfolio, getProfile, getSeo } from "@/lib/getData";
+import { getSeoOverride } from "@/lib/seo-settings";
 
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const seo = await getSeo();
-  const title = "About Md. Akib Hasan - Certified GDS Instructor";
-  const description =
+  const [seo, override] = await Promise.all([getSeo(), getSeoOverride("about")]);
+  const defaultTitle = "About Md. Akib Hasan - Certified GDS Instructor";
+  const defaultDescription =
     "View Md. Akib Hasan portfolio: certified GDS Instructor in Dhaka with practical expertise in Sabre, Galileo, airline reservation, ticket issuance, reissue, and refund training.";
+
+  const title = override?.metaTitle || defaultTitle;
+  const description = override?.metaDescription || defaultDescription;
+  const siteUrl = seo?.siteUrl || "https://akibhasan.online";
 
   return {
     title,
     description,
-    keywords: [
-      "Best GDS training institute",
-      "Air Ticketing Course in Bangladesh",
-      "GDS Training in Dhaka",
-      "Md Akib Hasan GDS Instructor"
-    ],
-    alternates: { canonical: "/about" },
+    keywords: override?.keywords?.length
+      ? override.keywords
+      : [
+          "Best GDS training institute",
+          "Air Ticketing Course in Bangladesh",
+          "GDS Training in Dhaka",
+          "Md Akib Hasan GDS Instructor"
+        ],
+    alternates: { canonical: override?.canonicalUrl || "/about" },
     openGraph: {
-      title: `${title} | ${seo?.siteName || 'GDS Training'}`,
-      description,
-      url: `${seo?.siteUrl || 'https://gds-training.vercel.app'}/about`
+      title: override?.ogTitle || `${title} | ${seo?.siteName || 'Md. Akib Hasan'}`,
+      description: override?.ogDescription || description,
+      url: `${siteUrl}/about`,
+      images: override?.ogImage ? [{ url: override.ogImage }] : undefined
     },
     twitter: { card: "summary", title, description }
   };

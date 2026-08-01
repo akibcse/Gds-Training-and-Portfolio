@@ -26,7 +26,7 @@ const serif = Merriweather({
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getGlobalSeo();
-  const fallbackSiteUrl = "https://airtech-aviation-ota.vercel.app";
+  const fallbackSiteUrl = "https://akibhasan.online";
   const fallbackGoogleVerification = "wyMy_PJ7kZvizW2GTPUZN9NSmNTaDjsbdjcJ3C3hrlY";
 
   const normalizeGoogleVerification = (value?: string | null) => {
